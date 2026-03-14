@@ -1,6 +1,7 @@
 import { useApp } from '../context/AppContext'
 import BusinessCard from './BusinessCard'
-import { TrendingUp, Search, Globe, WifiOff, ArrowUp, ArrowDown, Target } from 'lucide-react'
+import { TrendingUp, Search, Globe, WifiOff, ArrowUp, ArrowDown, Target, Download, Loader2 } from 'lucide-react'
+import { exportToCSV } from '../utils/csvExport'
 
 // Rubros ordenados por probabilidad de no tener web (mayor → menor)
 const HOT_TARGETS = [
@@ -52,12 +53,12 @@ export default function BusinessList() {
     filterMode, setFilterMode,
     sortBy, setSortBy, sortOrder, setSortOrder,
     setSuggestedType,
+    isPaginating, contactStatuses, addToast,
   } = useApp()
 
   // Apply filter
   const filtered = businesses.filter(b => {
     const lh      = lighthouseData[b.place_id]
-    const loading = loadingLighthouse?.[b.place_id]
     if (filterMode === 'no-website')  return lh?.noWebsite === true
     if (filterMode === 'has-website') return b.website && !lh?.noWebsite
     return true
@@ -88,6 +89,18 @@ export default function BusinessList() {
     else { setSortBy(key); setSortOrder('asc') }
   }
 
+  // Business intelligence stats
+  const noWebCount = businesses.filter(b => lighthouseData[b.place_id]?.noWebsite).length
+  const withWebCount = businesses.filter(b => b.website).length
+  const withPhoneCount = businesses.filter(b => b.phone).length
+  const analyzedCount = Object.keys(lighthouseData).filter(id => businesses.some(b => b.place_id === id)).length
+  const noWebPct = analyzedCount > 0 ? Math.round((noWebCount / analyzedCount) * 100) : 0
+
+  const handleExportCSV = () => {
+    exportToCSV(businesses, lighthouseData, contactStatuses)
+    addToast('CSV exportado', 'success')
+  }
+
   if (isSearching) {
     return (
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -106,7 +119,7 @@ export default function BusinessList() {
           </div>
           <div>
             <p className="text-xs font-bold text-slate-700 dark:text-gray-200">Rubros con mayor demanda de web</p>
-            <p className="text-[11px] text-slate-400">Clickeá uno para pre-llenar la búsqueda</p>
+            <p className="text-[11px] text-slate-400">Clickea uno para pre-llenar la busqueda</p>
           </div>
         </div>
 
@@ -145,13 +158,45 @@ export default function BusinessList() {
             <span className="text-xs font-semibold text-slate-600 dark:text-gray-300">
               {sorted.length} / {businesses.length} negocios
             </span>
+            {isPaginating && (
+              <span className="flex items-center gap-1 text-[10px] text-indigo-500 font-medium">
+                <Loader2 className="w-3 h-3 animate-spin" /> cargando mas...
+              </span>
+            )}
           </div>
-          {searchQuery.type && (
-            <span className="text-[11px] text-slate-400 italic truncate max-w-36">
-              "{searchQuery.type}" · {searchQuery.location}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {searchQuery.type && (
+              <span className="text-[11px] text-slate-400 italic truncate max-w-36">
+                "{searchQuery.type}" · {searchQuery.location}
+              </span>
+            )}
+            <button
+              onClick={handleExportCSV}
+              className="btn-ghost text-xs"
+              title="Exportar CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
+
+        {/* Business Intelligence Bar */}
+        {analyzedCount > 0 && (
+          <div className="mb-2 p-2.5 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-indigo-700 dark:text-indigo-300">
+                {noWebCount} de {analyzedCount} sin web ({noWebPct}%)
+              </span>
+              <span className="text-slate-500 dark:text-gray-400">
+                {withWebCount} con web · {withPhoneCount} con tel
+              </span>
+            </div>
+            <div className="mt-1.5 h-2 bg-white dark:bg-gray-800 rounded-full overflow-hidden flex">
+              <div style={{width: `${noWebPct}%`}} className="bg-red-400 transition-all duration-500" />
+              <div style={{width: `${100-noWebPct}%`}} className="bg-green-400 transition-all duration-500" />
+            </div>
+          </div>
+        )}
 
         {/* Filter: website */}
         <div className="flex gap-1.5 flex-wrap pb-2">

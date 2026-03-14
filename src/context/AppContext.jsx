@@ -21,6 +21,36 @@ export function AppProvider({ children }) {
   const [sortOrder, setSortOrder] = useState('asc')  // 'asc' | 'desc'
   const [showSaved, setShowSaved] = useState(false)
   const [showInteresados, setShowInteresados] = useState(false)
+  const [isPaginating, setIsPaginating] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+
+  // Search history persisted
+  const [searchHistory, setSearchHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ac_search_history') || '[]') } catch { return [] }
+  })
+  useEffect(() => {
+    localStorage.setItem('ac_search_history', JSON.stringify(searchHistory))
+  }, [searchHistory])
+  const addSearchEntry = useCallback((entry) => {
+    setSearchHistory(prev => [entry, ...prev].slice(0, 20))
+  }, [])
+
+  // User settings persisted
+  const [userSettings, setUserSettings] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ac_user_settings') || '{}') } catch { return {} }
+  })
+  useEffect(() => {
+    localStorage.setItem('ac_user_settings', JSON.stringify(userSettings))
+  }, [userSettings])
+
+  // Toast notifications
+  const [toasts, setToasts] = useState([])
+  const addToast = useCallback((message, type = 'info') => {
+    const id = Date.now()
+    setToasts(prev => [...prev, { id, message, type }])
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500)
+  }, [])
 
   const [savedBusinesses, setSavedBusinesses] = useState(() => {
     try { return JSON.parse(localStorage.getItem('ac_saved') || '[]') } catch { return [] }
@@ -103,10 +133,7 @@ export function AppProvider({ children }) {
     setCompareList(prev => {
       const exists = prev.find(b => b.place_id === business.place_id)
       if (exists) return prev.filter(b => b.place_id !== business.place_id)
-      if (prev.length >= 3) {
-        alert('Máximo 3 negocios para comparar. Elimina uno primero.')
-        return prev
-      }
+      if (prev.length >= 3) return prev
       return [...prev, business]
     })
   }, [])
@@ -141,6 +168,12 @@ export function AppProvider({ children }) {
       contactStatuses, cycleContactStatus, clearContactStatus, getContactStatus,
       trackedBusinesses, setTrackedBusinesses, trackedCounts,
       showInteresados, setShowInteresados,
+      isPaginating, setIsPaginating,
+      showDashboard, setShowDashboard,
+      showSettings, setShowSettings,
+      searchHistory, addSearchEntry,
+      userSettings, setUserSettings,
+      toasts, addToast,
       mapRef, placesServiceRef,
     }}>
       {children}

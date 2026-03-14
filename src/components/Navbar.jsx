@@ -1,10 +1,10 @@
 import { useTheme } from '../context/ThemeContext'
 import { useApp } from '../context/AppContext'
-import { Moon, Sun, GitCompare, Zap, Bookmark, Check } from 'lucide-react'
+import { Moon, Sun, GitCompare, Zap, Bookmark, Check, BarChart3, Settings } from 'lucide-react'
 
 export default function Navbar() {
   const { isDark, toggleTheme } = useTheme()
-  const { compareList, setShowCompare, savedBusinesses, setShowSaved, trackedCounts, setShowInteresados } = useApp()
+  const { compareList, setShowCompare, savedBusinesses, setShowSaved, trackedCounts, setShowInteresados, setShowDashboard, setShowSettings, searchHistory } = useApp()
 
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-800 px-5 h-14 flex items-center justify-between sticky top-0 z-50">
@@ -17,12 +17,21 @@ export default function Navbar() {
           Auto<span className="text-indigo-600">Clientes</span>
         </span>
         <span className="hidden sm:inline text-[11px] font-medium text-slate-400 bg-slate-100 dark:bg-gray-800 dark:text-gray-500 px-2 py-0.5 rounded-full ml-1">
-          Análisis Competitivo
+          v1.0
         </span>
       </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        {/* Dashboard */}
+        <button
+          onClick={() => setShowDashboard(true)}
+          className={`btn-ghost relative ${searchHistory.length > 0 ? 'text-indigo-500' : ''}`}
+          title="Dashboard"
+        >
+          <BarChart3 className="w-4 h-4" />
+        </button>
+
         {compareList.length > 0 && (
           <button
             onClick={() => setShowCompare(true)}
@@ -59,6 +68,9 @@ export default function Navbar() {
               {savedBusinesses.length}
             </span>
           )}
+        </button>
+        <button onClick={() => setShowSettings(true)} className="btn-ghost" title="Configuracion">
+          <Settings className="w-4 h-4" />
         </button>
         <button onClick={toggleTheme} className="btn-ghost" title={isDark ? 'Modo claro' : 'Modo oscuro'}>
           {isDark ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}

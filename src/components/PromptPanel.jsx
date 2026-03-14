@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, Send, Star, Globe, MapPin, Phone, Copy, Check } from 'lucide-react'
+import { MessageSquare, Send, Star, Globe, MapPin, Phone, Copy, Check, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { generateWhatsAppMessage } from '../utils/promptTemplates'
 
@@ -49,7 +49,7 @@ function ScoreMini({ label, score }) {
 }
 
 export default function PromptPanel() {
-  const { selectedBusiness, lighthouseData, searchQuery } = useApp()
+  const { selectedBusiness, setSelectedBusiness, lighthouseData, searchQuery, userSettings } = useApp()
   const [message, setMessage] = useState('')
   const [copied, setCopied] = useState(false)
 
@@ -61,7 +61,7 @@ export default function PromptPanel() {
   // Generate message when business changes
   useEffect(() => {
     if (business) {
-      setMessage(generateWhatsAppMessage(business, lighthouse, loc, businessType))
+      setMessage(generateWhatsAppMessage(business, loc, businessType, userSettings.customTemplate || ''))
     }
   }, [business?.place_id])
 
@@ -91,10 +91,20 @@ export default function PromptPanel() {
         <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
           <MessageSquare className="w-4 h-4 text-white" />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">Mensaje de contacto</p>
           <p className="text-[11px] text-slate-400 leading-tight">Edita y envia por WhatsApp</p>
         </div>
+        {/* Close button — visible on mobile when business is selected */}
+        {business && (
+          <button
+            onClick={() => setSelectedBusiness(null)}
+            className="lg:hidden btn-ghost"
+            title="Cerrar"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Content */}

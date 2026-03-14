@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { Search, MapPin, Loader2, X, Sparkles } from 'lucide-react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { Search, MapPin, Loader2, X, Sparkles, Radar, Clock } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getLighthouseData } from '../utils/lighthouseApi'
 
@@ -11,11 +11,25 @@ const QUICK_SEARCHES = [
   { label: 'Peluquerías', icon: '✂️' },
 ]
 
+const RADIUS_OPTIONS = [
+  { value: 1000,  label: '1 km' },
+  { value: 2000,  label: '2 km' },
+  { value: 5000,  label: '5 km' },
+  { value: 10000, label: '10 km' },
+  { value: 20000, label: '20 km' },
+  { value: 50000, label: '50 km' },
+]
+
 export default function SearchBar() {
   const [businessType, setBusinessType] = useState('')
   const [location, setLocation]         = useState('')
+  const [radius, setRadius]             = useState(5000)
   const locationInputRef = useRef(null)
   const autocompleteRef  = useRef(null)
+  const locationCoordsRef = useRef(null)
+
+  const [showHistory, setShowHistory] = useState(false)
+  const typeInputRef = useRef(null)
 
   const {
     setBusinesses, setIsSearching, isSearching,
@@ -24,7 +38,23 @@ export default function SearchBar() {
     setLighthouseData, setLoadingLighthouse,
     setFilterMode, setSortBy,
     suggestedType, setSuggestedType,
+    isPaginating, setIsPaginating,
+    addSearchEntry, addToast,
+    searchHistory,
   } = useApp()
+
+  // Unique recent search types (deduplicated, max 8)
+  const recentSearchTypes = useMemo(() => {
+    const seen = new Set()
+    return searchHistory
+      .filter(entry => {
+        const key = entry.type.toLowerCase().trim()
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      .slice(0, 8)
+  }, [searchHistory])
 
   // Cuando el usuario clickea un chip del panel vacío, se pre-llena el input
   useEffect(() => {
@@ -42,45 +72,94 @@ export default function SearchBar() {
     })
     autocompleteRef.current.addListener('place_changed', () => {
       const place = autocompleteRef.current.getPlace()
-      if (place.geometry) setLocation(place.formatted_address || place.name)
+      if (place.geometry) {
+        setLocation(place.formatted_address || place.name)
+        locationCoordsRef.current = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        }
+      }
     })
   }, [window.google])
+
+  const fetchNextPages = (pagination, pageCount = 1) => {
+    if (!pagination?.hasNextPage || pageCount >= 2) {
+      setIsPaginating(false)
+      return
+    }
+    setTimeout(() => {
+      pagination.nextPage((moreResults, moreStatus, morePagination) => {
+        if (moreStatus === window.google.maps.places.PlacesServiceStatus.OK && moreResults?.length) {
+          setBusinesses(prev => [...prev, ...moreResults])
+          autoAnalyze(moreResults)
+          fetchNextPages(morePagination, pageCount + 1)
+        } else {
+          setIsPaginating(false)
+        }
+      })
+    }, 2000)
+  }
 
   const handleSearch = async (typeOverride) => {
     const type = typeOverride || businessType
     if (!type.trim() || !location.trim()) {
-      alert('Ingresa tipo de negocio y ciudad')
+      addToast('Ingresa tipo de negocio y ciudad', 'error')
       return
     }
     if (!placesServiceRef.current) {
-      alert('El mapa aún no cargó. Espera un momento.')
+      addToast('El mapa aun no cargo. Espera un momento.', 'error')
       return
     }
     setIsSearching(true)
     setSelectedBusiness(null)
     setSearchQuery({ type, location })
 
-    placesServiceRef.current.textSearch({ query: `${type} en ${location}` }, (results, status) => {
+    const searchOpts = locationCoordsRef.current
+      ? {
+          location: new window.google.maps.LatLng(locationCoordsRef.current.lat, locationCoordsRef.current.lng),
+          radius,
+          keyword: type,
+        }
+      : { query: `${type} en ${location}` }
+
+    const searchMethod = locationCoordsRef.current ? 'nearbySearch' : 'textSearch'
+
+    placesServiceRef.current[searchMethod](searchOpts, (results, status, pagination) => {
       setIsSearching(false)
       if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
-        const top15 = results.slice(0, 15)
-        setBusinesses(top15)
-        setLighthouseData({})
+        setBusinesses(results)
         setLoadingLighthouse({})
         setFilterMode('all')
         setSortBy(null)
-        const loc = top15[0].geometry?.location
+        const loc = results[0].geometry?.location
         if (loc) { setMapCenter({ lat: loc.lat(), lng: loc.lng() }); setMapZoom(14) }
-        autoAnalyze(top15)
+        autoAnalyze(results)
+        addToast(`${results.length} negocios encontrados`, 'success')
+
+        // Save to search history
+        addSearchEntry({
+          date: new Date().toISOString(),
+          type, location,
+          totalResults: results.length,
+        })
+
+        // Fetch all remaining pages (up to 60 results total)
+        if (pagination?.hasNextPage) {
+          setIsPaginating(true)
+          fetchNextPages(pagination)
+        }
       } else {
         setBusinesses([])
-        alert('Sin resultados. Verifica que la Places API esté habilitada en Google Cloud.')
+        addToast('Sin resultados para esta busqueda', 'error')
       }
     })
   }
 
   const autoAnalyze = async (list) => {
     const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    // Read current cache once at start
+    const cached = JSON.parse(localStorage.getItem('ac_lighthouse') || '{}')
+
     for (const biz of list) {
       await new Promise(resolve => {
         const svc = new window.google.maps.places.PlacesService(document.createElement('div'))
@@ -92,6 +171,14 @@ export default function SearchBar() {
               biz.phone = place.international_phone_number || place.formatted_phone_number || null
               setBusinesses(prev => prev.map(b => b.place_id === biz.place_id ? { ...biz } : b))
             }
+
+            // Use cached Lighthouse data if available
+            if (cached[biz.place_id] && !cached[biz.place_id].error) {
+              setLighthouseData(prev => ({ ...prev, [biz.place_id]: cached[biz.place_id] }))
+              resolve()
+              return
+            }
+
             if (biz.website) {
               setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: true }))
               try {
@@ -109,7 +196,7 @@ export default function SearchBar() {
           }
         )
       })
-      await new Promise(r => setTimeout(r, 300)) // evitar rate limit
+      await new Promise(r => setTimeout(r, 300))
     }
   }
 
@@ -127,13 +214,38 @@ export default function SearchBar() {
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
+              ref={typeInputRef}
               type="text"
               placeholder="Tipo de negocio…"
               value={businessType}
               onChange={e => setBusinessType(e.target.value)}
+              onFocus={() => setShowHistory(true)}
+              onBlur={() => setTimeout(() => setShowHistory(false), 150)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               className="input-field pl-10 shadow-sm"
             />
+            {/* Search history dropdown */}
+            {showHistory && recentSearchTypes.length > 0 && !businessType && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+                <p className="text-[11px] text-slate-400 dark:text-gray-500 px-3 pt-2 pb-1 font-medium">Busquedas recientes</p>
+                {recentSearchTypes.map((entry, i) => (
+                  <button
+                    key={i}
+                    onMouseDown={e => {
+                      e.preventDefault()
+                      setBusinessType(entry.type)
+                      setShowHistory(false)
+                      if (entry.location) setLocation(entry.location)
+                    }}
+                    className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-gray-500 flex-shrink-0" />
+                    <span className="truncate">{entry.type}</span>
+                    <span className="text-[11px] text-slate-400 dark:text-gray-500 ml-auto flex-shrink-0">{entry.location}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Divider */}
@@ -151,6 +263,20 @@ export default function SearchBar() {
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               className="input-field pl-10 shadow-sm"
             />
+          </div>
+
+          {/* Radius selector */}
+          <div className="relative flex-shrink-0 w-full sm:w-auto">
+            <Radar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <select
+              value={radius}
+              onChange={e => setRadius(Number(e.target.value))}
+              className="input-field pl-9 pr-2 shadow-sm appearance-none cursor-pointer text-sm min-w-[100px]"
+            >
+              {RADIUS_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Actions */}

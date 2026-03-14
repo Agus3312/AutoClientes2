@@ -89,7 +89,7 @@ export default function BusinessCard({ business, index }) {
       ? rawPhone.replace(/\D/g, '')
       : rawPhone.replace(/\D/g, '').replace(/^0+/, '')
     if (!phone) return
-    const msg = generateWhatsAppMessage(business, scores, searchQuery.location || '', searchQuery.type || '')
+    const msg = generateWhatsAppMessage(business, searchQuery.location || '', searchQuery.type || '')
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
     window.open(url, '_blank')
   }

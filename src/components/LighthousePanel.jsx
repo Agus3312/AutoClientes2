@@ -21,10 +21,7 @@ export default function LighthousePanel({ business }) {
   const runAnalysis = async (e) => {
     e.stopPropagation()
     const website = business.website
-    if (!website) {
-      alert('Este negocio no tiene sitio web registrado')
-      return
-    }
+    if (!website) return
 
     setLoadingLighthouse(prev => ({ ...prev, [business.place_id]: true }))
     setIsOpen(true)
