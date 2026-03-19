@@ -1,5 +1,6 @@
 import { Check, X, MapPin, Star, ExternalLink, Trash2, Phone } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { formatPhoneForWhatsApp } from '../utils/phoneUtils'
 
 const SECTIONS = [
   { status: 'interested', label: 'Interesados', color: 'blue', bgCard: 'bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900/40' },
@@ -122,7 +123,7 @@ export default function InteresadosPanel() {
                           </a>
                           {b.phone && (
                             <a
-                              href={`https://wa.me/${(b.phone || '').replace(/\D/g, '')}`}
+                              href={`https://wa.me/${formatPhoneForWhatsApp(b.phone)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="btn-ghost text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"

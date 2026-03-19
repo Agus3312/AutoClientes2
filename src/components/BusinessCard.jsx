@@ -4,6 +4,7 @@ import LighthousePanel from './LighthousePanel'
 import { useApp } from '../context/AppContext'
 import { exportToPDF } from '../utils/pdfExport'
 import { generateWhatsAppMessage } from '../utils/promptTemplates'
+import { buildWhatsAppUrl } from '../utils/phoneUtils'
 
 function Stars({ rating }) {
   const full = Math.round(rating)
@@ -90,13 +91,9 @@ function BusinessCard({ business, index }) {
 
   const handleWhatsApp = e => {
     e.stopPropagation()
-    const rawPhone = business.phone || ''
-    const phone = rawPhone.startsWith('+')
-      ? rawPhone.replace(/\D/g, '')
-      : rawPhone.replace(/\D/g, '').replace(/^0+/, '')
-    if (!phone) return
     const msg = generateWhatsAppMessage(business, searchQuery.location || '', searchQuery.type || '')
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+    const url = buildWhatsAppUrl(business.phone, msg)
+    if (!url) return
     window.open(url, '_blank')
   }
 

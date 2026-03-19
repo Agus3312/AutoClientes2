@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { MessageSquare, Send, Star, Globe, MapPin, Phone, Copy, Check, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { generateWhatsAppMessage } from '../utils/promptTemplates'
+import { buildWhatsAppUrl } from '../utils/phoneUtils'
 
 function BusinessSummary({ business, lighthouse }) {
   const hasScores = lighthouse && !lighthouse.error && !lighthouse.noWebsite
@@ -73,12 +74,8 @@ export default function PromptPanel() {
 
   const handleSendWhatsApp = () => {
     if (!business) return
-    const rawPhone = business.phone || ''
-    const phone = rawPhone.startsWith('+')
-      ? rawPhone.replace(/\D/g, '')
-      : rawPhone.replace(/\D/g, '').replace(/^0+/, '')
-    if (!phone) return
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+    const url = buildWhatsAppUrl(business.phone, message)
+    if (!url) return
     window.open(url, '_blank')
   }
 
