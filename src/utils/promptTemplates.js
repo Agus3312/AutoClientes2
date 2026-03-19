@@ -6,118 +6,118 @@
 const BUSINESS_TYPES = {
   gym: {
     label: 'gimnasio',
-    saas: 'sistema de gestion de socios, cobro automatico de cuotas y rutinas personalizadas por app',
-    pain: 'gestionar socios y cobros manualmente',
+    saas: 'sistema que organiza socios, cobra cuotas automaticamente y envia rutinas por app',
+    pain: 'tener todo anotado en planillas, perseguir a los que deben cuotas y no saber cuantos socios activos tienen realmente',
   },
   restaurant: {
     label: 'restaurante',
-    saas: 'sistema de pedidos online, menu digital con QR, y gestion de delivery propio',
-    pain: 'depender de apps de delivery que cobran comisiones altas',
+    saas: 'sistema que organiza pedidos, mesas y delivery desde un solo lugar con menu digital QR',
+    pain: 'tener pedidos por WhatsApp mezclados con los del local, perder comandas y no saber que se vendio en el dia',
   },
   cafe: {
     label: 'cafeteria',
-    saas: 'sistema de pedidos con QR, programa de fidelidad digital y gestion de stock',
-    pain: 'perder clientes recurrentes por no tener un programa de fidelidad',
+    saas: 'sistema de pedidos con QR, programa de fidelidad digital y control de stock',
+    pain: 'anotar pedidos a mano, no saber que clientes vuelven y quedarse sin stock sin darse cuenta',
   },
   bakery: {
     label: 'panaderia',
-    saas: 'sistema de pedidos anticipados, catalogo digital y gestion de produccion diaria',
-    pain: 'perder ventas por no aceptar pedidos anticipados',
+    saas: 'sistema de pedidos anticipados, catalogo digital y control de produccion diaria',
+    pain: 'recibir pedidos por WhatsApp sin orden, producir de mas o de menos y no tener registro de nada',
   },
   dentist: {
     label: 'consultorio dental',
     saas: 'sistema de turnos online, recordatorios automaticos por WhatsApp y ficha digital de pacientes',
-    pain: 'perder tiempo con llamadas para agendar turnos y pacientes que no asisten',
+    pain: 'atender el telefono todo el dia para dar turnos, que los pacientes falten sin avisar y buscar fichas en carpetas',
   },
   doctor: {
     label: 'consultorio',
     saas: 'sistema de turnos online, historia clinica digital y recordatorios automaticos',
-    pain: 'gestionar turnos por telefono y tener carpetas fisicas de pacientes',
+    pain: 'pasar mas tiempo organizando turnos por telefono que atendiendo pacientes, y tener todo en papel',
   },
   lawyer: {
     label: 'estudio juridico',
     saas: 'sistema de gestion de casos, portal de clientes y facturacion automatica',
-    pain: 'hacer seguimiento manual de expedientes y perder tiempo en tareas administrativas',
+    pain: 'perder el hilo de los expedientes, que los clientes llamen preguntando como va su caso y facturar a mano',
   },
   accounting: {
     label: 'estudio contable',
     saas: 'portal de clientes para subir documentos, alertas de vencimientos y facturacion automatizada',
-    pain: 'recibir documentos por WhatsApp y perder tiempo organizandolos',
+    pain: 'recibir fotos de facturas por WhatsApp, buscar documentos entre miles de mensajes y olvidar vencimientos',
   },
   beauty_salon: {
     label: 'salon de belleza',
     saas: 'sistema de reservas online 24/7, recordatorios automaticos y gestion de agenda del equipo',
-    pain: 'perder reservas fuera de horario y tener cancelaciones de ultimo momento',
+    pain: 'tener la agenda en papel, que la gente cancele a ultimo momento y perder turnos que podrian haber dado a otro',
   },
   hair_care: {
     label: 'peluqueria',
     saas: 'sistema de turnos online, recordatorios por WhatsApp y historial de servicios por cliente',
-    pain: 'gestionar la agenda manualmente y perder clientes por no tener turnos disponibles visibles',
+    pain: 'no saber que turnos tienen libres sin revisar la agenda, contestar WhatsApp todo el dia y que se pisen los horarios',
   },
   spa: {
     label: 'spa',
     saas: 'sistema de reserva de tratamientos, paquetes digitales, gift cards online y gestion de salas',
-    pain: 'no poder vender gift cards ni paquetes fuera del local',
+    pain: 'coordinar salas y profesionales a mano, no llevar control de paquetes vendidos y perder reservas por no contestar rapido',
   },
   car_repair: {
     label: 'taller mecanico',
     saas: 'sistema de turnos, seguimiento de reparaciones en tiempo real y presupuestos digitales',
-    pain: 'que los clientes llamen constantemente preguntando si ya esta listo su auto',
+    pain: 'que los clientes llamen 10 veces preguntando si ya esta listo, no tener registro de que se le hizo a cada auto y armar presupuestos a mano',
   },
   car_dealer: {
     label: 'concesionaria',
     saas: 'CRM automotor, cotizador online y seguimiento automatico de leads',
-    pain: 'perder leads por no hacer seguimiento a tiempo',
+    pain: 'que les escriban interesados y se olviden de hacerles seguimiento, perder ventas por desorganizacion',
   },
   real_estate_agency: {
     label: 'inmobiliaria',
     saas: 'CRM inmobiliario, publicacion automatica en portales y matching de propiedades con clientes',
-    pain: 'publicar manualmente en cada portal y perder leads',
+    pain: 'publicar la misma propiedad en 5 portales a mano, no saber que cliente busca que y perder consultas',
   },
   store: {
     label: 'tienda',
     saas: 'sistema de inventario, punto de venta digital y tienda online integrada',
-    pain: 'no saber que productos tienen en stock y perder ventas por no vender online',
+    pain: 'no saber que tienen en stock hasta que lo buscan, anotar ventas en cuaderno y no tener numeros claros del negocio',
   },
   clothing_store: {
     label: 'tienda de ropa',
-    saas: 'catalogo digital, sistema de tallas inteligente y tienda online con envios',
-    pain: 'mostrar productos solo por Instagram sin poder vender directo',
+    saas: 'catalogo digital, control de stock por talle/color y tienda online con envios',
+    pain: 'subir todo a Instagram uno por uno, que pregunten por un talle y no saber si queda, y perder ventas por no poder vender directo',
   },
   electronics_store: {
     label: 'tienda de electronica',
-    saas: 'e-commerce con comparador de productos, gestion de garantias y sistema de reparaciones',
-    pain: 'gestionar garantias y reparaciones en papel',
+    saas: 'sistema de ventas con control de garantias, stock y reparaciones',
+    pain: 'no tener registro de garantias, que el cliente venga con un ticket de hace 6 meses y no encontrar nada',
   },
   pet_store: {
     label: 'pet shop',
-    saas: 'tienda online, turnos de peluqueria canina y recordatorios de vacunas/desparasitacion',
-    pain: 'no poder recordarle a los clientes cuando les toca la proxima vacuna de su mascota',
+    saas: 'tienda online, turnos de peluqueria canina y recordatorios automaticos de vacunas',
+    pain: 'no poder avisarle a los clientes cuando les toca la proxima vacuna o desparasitacion de su mascota, y perder esas ventas',
   },
   veterinary_care: {
     label: 'veterinaria',
     saas: 'sistema de turnos, historial clinico digital de mascotas y recordatorios de vacunas automaticos',
-    pain: 'gestionar fichas en papel y que los dueños olviden las vacunas',
+    pain: 'buscar la ficha de cada mascota entre carpetas, que los dueños no se acuerden las vacunas y gestionar turnos por telefono todo el dia',
   },
   school: {
     label: 'institucion educativa',
     saas: 'plataforma de gestion academica, comunicacion con padres y cobro de cuotas online',
-    pain: 'comunicarse con los padres por grupos de WhatsApp desorganizados',
+    pain: 'que los grupos de WhatsApp con padres sean un caos, perseguir morosos uno por uno y no tener un canal de comunicacion ordenado',
   },
   lodging: {
     label: 'alojamiento',
     saas: 'motor de reservas directo, channel manager y check-in digital',
-    pain: 'pagar comisiones altas a Booking/Airbnb en cada reserva',
+    pain: 'actualizar disponibilidad en cada plataforma a mano, tener reservas en Booking y en WhatsApp sin cruzar y que se pisen',
   },
   pharmacy: {
     label: 'farmacia',
     saas: 'sistema de gestion de stock, pedidos online y recordatorios de medicacion para clientes',
-    pain: 'no saber que productos estan por vencer o agotarse',
+    pain: 'enterarse que un producto se agoto cuando el cliente lo pide, no controlar vencimientos y perder ventas recurrentes',
   },
   insurance_agency: {
     label: 'aseguradora',
     saas: 'CRM de polizas, cotizador online automatico y alertas de renovacion',
-    pain: 'perder renovaciones por no hacer seguimiento a tiempo',
+    pain: 'enterarse que una poliza vencio porque el cliente llamo enojado, y no tener un sistema que avise antes',
   },
 }
 
@@ -153,12 +153,12 @@ export function generateWhatsAppMessage(business, searchLocation = '', searchTyp
 
   const detected = detectBusinessType(business, searchType)
   const label = detected?.label || 'negocio'
-  const pain = detected?.pain || 'gestionar todo manualmente y perder tiempo en tareas que se pueden automatizar'
-  const saas = detected?.saas || 'herramientas digitales que ayudan a automatizar y hacer crecer el negocio'
+  const pain = detected?.pain || 'tener todo desorganizado entre WhatsApp, papeles y planillas, y perder tiempo en cosas que se podrian automatizar'
+  const saas = detected?.saas || 'herramientas digitales que organizan y automatizan la gestion del negocio'
 
-  let msg = `Buenas! Vi su ${label} en Google Maps y los contacto porque trabajo con negocios del rubro.\n`
+  let msg = `Buenas! Vi su ${label} en Google Maps y los contacto porque trabajo ayudando a negocios del rubro a organizarse mejor.\n`
   msg += `Muchos nos cuentan que el mayor problema es ${pain}.\n`
-  msg += `Nosotros ofrecemos ${saas}.\n`
+  msg += `Nosotros ayudamos con eso: ${saas}.\n`
   msg += `Les interesaria que les muestre como funciona en 5 minutos? Sin compromiso.`
 
   return msg
