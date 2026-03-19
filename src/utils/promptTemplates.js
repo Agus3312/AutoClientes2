@@ -153,13 +153,9 @@ export function generateWhatsAppMessage(business, searchLocation = '', searchTyp
 
   const detected = detectBusinessType(business, searchType)
   const label = detected?.label || 'negocio'
-  const pain = detected?.pain || 'tener todo desorganizado entre WhatsApp, papeles y planillas, y perder tiempo en cosas que se podrian automatizar'
-  const saas = detected?.saas || 'herramientas digitales que organizan y automatizan la gestion del negocio'
 
-  let msg = `Buenas! Vi su ${label} en Google Maps y los contacto porque trabajo ayudando a negocios del rubro a organizarse mejor.\n`
-  msg += `Muchos nos cuentan que el mayor problema es ${pain}.\n`
-  msg += `Nosotros ayudamos con eso: ${saas}.\n`
-  msg += `Les interesaria que les muestre como funciona en 5 minutos? Sin compromiso.`
+  let msg = `Buenas! Vi su ${label} en Google Maps. Hago paginas web y tambien ayudo a negocios como el suyo a organizarse mejor con herramientas digitales.\n`
+  msg += `Les interesaria que les cuente como? Sin compromiso.`
 
   return msg
 }
