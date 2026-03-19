@@ -151,11 +151,5 @@ export function generateWhatsAppMessage(business, searchLocation = '', searchTyp
       .replace(/\{dolor\}/g, detected?.pain || 'perder tiempo en tareas manuales')
   }
 
-  const detected = detectBusinessType(business, searchType)
-  const label = detected?.label || 'negocio'
-
-  let msg = `Buenas! Vi su ${label} en Google Maps. Hago paginas web y tambien ayudo a negocios como el suyo a organizarse mejor con herramientas digitales.\n`
-  msg += `Les interesaria que les cuente como? Sin compromiso.`
-
-  return msg
+  return `Buenas! Estuve viendo lo que hacen y me pareció muy interesante. Me dedico a desarrollar páginas web y también herramientas para organizar y mejorar procesos en negocios. Si en algún momento quieren potenciar eso, puedo darles una mano 🙂`
 }
