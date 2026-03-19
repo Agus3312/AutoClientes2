@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Search, MapPin, Loader2, X, Sparkles, Radar, Clock } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getLighthouseData } from '../utils/lighthouseApi'
+import { getLighthouseData, detectSaasTools } from '../utils/lighthouseApi'
 
 const QUICK_SEARCHES = [
   { label: 'Cafeterías', icon: '☕' },
@@ -39,9 +39,14 @@ export default function SearchBar() {
     setFilterMode, setSortBy,
     suggestedType, setSuggestedType,
     isPaginating, setIsPaginating,
+    isAnalyzing, setIsAnalyzing,
     addSearchEntry, addToast,
     searchHistory,
   } = useApp()
+
+  // Ref to cancel previous autoAnalyze runs
+  const analyzeAbortRef = useRef(0)
+  const debounceRef = useRef(null)
 
   // Unique recent search types (deduplicated, max 8)
   const recentSearchTypes = useMemo(() => {
@@ -110,6 +115,7 @@ export default function SearchBar() {
       addToast('El mapa aun no cargo. Espera un momento.', 'error')
       return
     }
+    analyzeAbortRef.current++ // Cancel any running autoAnalyze
     setIsSearching(true)
     setSelectedBusiness(null)
     setSearchQuery({ type, location })
@@ -156,21 +162,34 @@ export default function SearchBar() {
   }
 
   const autoAnalyze = async (list) => {
+    const runId = ++analyzeAbortRef.current
     const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    // Read current cache once at start
-    const cached = JSON.parse(localStorage.getItem('ac_lighthouse') || '{}')
+    const svc = placesServiceRef.current
+    setIsAnalyzing(true)
 
     for (const biz of list) {
+      // Stop if a newer search was triggered
+      if (analyzeAbortRef.current !== runId) return
+
       await new Promise(resolve => {
-        const svc = new window.google.maps.places.PlacesService(document.createElement('div'))
         svc.getDetails(
           { placeId: biz.place_id, fields: ['website', 'formatted_phone_number', 'international_phone_number'] },
           async (place, st) => {
-            if (st === window.google.maps.places.PlacesServiceStatus.OK) {
-              biz.website = place.website || null
-              biz.phone = place.international_phone_number || place.formatted_phone_number || null
-              setBusinesses(prev => prev.map(b => b.place_id === biz.place_id ? { ...biz } : b))
-            }
+            // Stop if a newer search was triggered
+            if (analyzeAbortRef.current !== runId) { resolve(); return }
+
+            const website = st === window.google.maps.places.PlacesServiceStatus.OK
+              ? (place.website || null) : null
+            const phone = st === window.google.maps.places.PlacesServiceStatus.OK
+              ? (place.international_phone_number || place.formatted_phone_number || null) : null
+
+            // Update business immutably (never mutate biz directly)
+            setBusinesses(prev => prev.map(b =>
+              b.place_id === biz.place_id ? { ...b, website, phone } : b
+            ))
+
+            // Read cache fresh each iteration to avoid stale data
+            const cached = JSON.parse(localStorage.getItem('ac_lighthouse') || '{}')
 
             // Use cached Lighthouse data if available
             if (cached[biz.place_id] && !cached[biz.place_id].error) {
@@ -179,18 +198,34 @@ export default function SearchBar() {
               return
             }
 
-            if (biz.website) {
+            if (website) {
               setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: true }))
               try {
-                const data = await getLighthouseData(biz.website, apiKey)
-                setLighthouseData(prev => ({ ...prev, [biz.place_id]: data }))
+                // Run Lighthouse + SaaS detection in parallel
+                const [data, saasTools] = await Promise.all([
+                  getLighthouseData(website, apiKey),
+                  detectSaasTools(website),
+                ])
+                if (analyzeAbortRef.current === runId) {
+                  // Merge SaaS tools from both sources (PageSpeed audits + HTML scan)
+                  const allSaas = [...(data.detectedSaas || [])]
+                  const seen = new Set(allSaas.map(s => s.name))
+                  for (const s of saasTools) {
+                    if (!seen.has(s.name)) { allSaas.push(s); seen.add(s.name) }
+                  }
+                  setLighthouseData(prev => ({ ...prev, [biz.place_id]: { ...data, detectedSaas: allSaas } }))
+                }
               } catch (err) {
-                setLighthouseData(prev => ({ ...prev, [biz.place_id]: { error: err.message } }))
+                if (analyzeAbortRef.current === runId) {
+                  setLighthouseData(prev => ({ ...prev, [biz.place_id]: { error: err.message } }))
+                }
               } finally {
-                setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: false }))
+                if (analyzeAbortRef.current === runId) {
+                  setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: false }))
+                }
               }
             } else {
-              setLighthouseData(prev => ({ ...prev, [biz.place_id]: { noWebsite: true } }))
+              setLighthouseData(prev => ({ ...prev, [biz.place_id]: { noWebsite: true, detectedSaas: [] } }))
             }
             resolve()
           }
@@ -198,9 +233,17 @@ export default function SearchBar() {
       })
       await new Promise(r => setTimeout(r, 300))
     }
+    if (analyzeAbortRef.current === runId) setIsAnalyzing(false)
+  }
+
+  const handleSearchDebounced = (typeOverride) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => handleSearch(typeOverride), 300)
   }
 
   const handleClear = () => {
+    analyzeAbortRef.current++
+    setIsAnalyzing(false)
     setBusinessType(''); setLocation('')
     setBusinesses([]); setSelectedBusiness(null)
   }
@@ -221,7 +264,7 @@ export default function SearchBar() {
               onChange={e => setBusinessType(e.target.value)}
               onFocus={() => setShowHistory(true)}
               onBlur={() => setTimeout(() => setShowHistory(false), 150)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={e => e.key === 'Enter' && handleSearchDebounced()}
               className="input-field pl-10 shadow-sm"
             />
             {/* Search history dropdown */}
@@ -260,7 +303,7 @@ export default function SearchBar() {
               placeholder="Ciudad o zona…"
               value={location}
               onChange={e => setLocation(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={e => e.key === 'Enter' && handleSearchDebounced()}
               className="input-field pl-10 shadow-sm"
             />
           </div>
@@ -281,10 +324,12 @@ export default function SearchBar() {
 
           {/* Actions */}
           <div className="flex gap-2 w-full sm:w-auto">
-            <button onClick={() => handleSearch()} disabled={isSearching} className="btn-primary flex-1 sm:flex-none justify-center shadow-indigo-100">
+            <button onClick={() => handleSearch()} disabled={isSearching || isAnalyzing} className="btn-primary flex-1 sm:flex-none justify-center shadow-indigo-100">
               {isSearching
                 ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Buscando…</span></>
-                : <><Sparkles className="w-4 h-4" /><span>Analizar</span></>}
+                : isAnalyzing
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Analizando…</span></>
+                  : <><Sparkles className="w-4 h-4" /><span>Analizar</span></>}
             </button>
             {(businessType || location) && (
               <button onClick={handleClear} className="btn-secondary px-3">

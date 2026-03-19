@@ -14,6 +14,7 @@ import DashboardPanel from './components/DashboardPanel'
 import SettingsPanel from './components/SettingsPanel'
 import WelcomeScreen from './components/WelcomeScreen'
 import Toast from './components/Toast'
+import ErrorBoundary from './components/ErrorBoundary'
 import { AlertCircle } from 'lucide-react'
 
 const GOOGLE_MAPS_LIBRARIES = ['places']
@@ -67,15 +68,21 @@ function AppContent() {
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         {/* Left: Map + List */}
         <div className="flex flex-col lg:w-[58%] h-full overflow-hidden border-r border-slate-100 dark:border-gray-800">
-          <MapView />
-          <BusinessList />
+          <ErrorBoundary>
+            <MapView />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <BusinessList />
+          </ErrorBoundary>
         </div>
 
         {/* Right: Message panel — hidden on mobile unless business selected */}
         <div className={`lg:w-[42%] lg:h-full overflow-hidden flex-shrink-0 ${
           selectedBusiness ? 'fixed inset-0 z-40 lg:relative lg:inset-auto' : 'hidden lg:block'
         }`}>
-          <PromptPanel />
+          <ErrorBoundary>
+            <PromptPanel />
+          </ErrorBoundary>
         </div>
       </main>
 

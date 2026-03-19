@@ -3,20 +3,20 @@ import BusinessCard from './BusinessCard'
 import { TrendingUp, Search, Globe, WifiOff, ArrowUp, ArrowDown, Target, Download, Loader2 } from 'lucide-react'
 import { exportToCSV } from '../utils/csvExport'
 
-// Rubros ordenados por probabilidad de no tener web (mayor → menor)
+// Rubros con mayor oportunidad de venta de SaaS
 const HOT_TARGETS = [
-  { label: 'Plomeros',        icon: '🔧', reason: '~80% sin web' },
-  { label: 'Electricistas',   icon: '⚡', reason: '~78% sin web' },
-  { label: 'Carpinteros',     icon: '🪚', reason: '~75% sin web' },
-  { label: 'Cerrajeros',      icon: '🔑', reason: '~74% sin web' },
-  { label: 'Pintores',        icon: '🎨', reason: '~72% sin web' },
-  { label: 'Veterinarias',    icon: '🐾', reason: '~60% sin web' },
-  { label: 'Kinesiólogos',    icon: '💆', reason: '~65% sin web' },
-  { label: 'Contadores',      icon: '📊', reason: '~55% sin web' },
-  { label: 'Dentistas',       icon: '🦷', reason: '~45% sin web' },
-  { label: 'Peluquerías',     icon: '✂️', reason: '~50% sin web' },
-  { label: 'Ferreterías',     icon: '🔩', reason: '~70% sin web' },
-  { label: 'Nutricionistas',  icon: '🥗', reason: '~62% sin web' },
+  { label: 'Dentistas',       icon: '🦷', reason: 'Turnos + fichas' },
+  { label: 'Peluquerías',     icon: '✂️', reason: 'Reservas 24/7' },
+  { label: 'Restaurantes',    icon: '🍽️', reason: 'Pedidos + delivery' },
+  { label: 'Gimnasios',       icon: '💪', reason: 'Gestion de socios' },
+  { label: 'Veterinarias',    icon: '🐾', reason: 'Turnos + vacunas' },
+  { label: 'Consultorios',    icon: '⚕️', reason: 'Turnos online' },
+  { label: 'Inmobiliarias',   icon: '🏠', reason: 'CRM + portales' },
+  { label: 'Talleres',        icon: '🔧', reason: 'Seguimiento reparac.' },
+  { label: 'Contadores',      icon: '📊', reason: 'Portal clientes' },
+  { label: 'Salones de belleza', icon: '💅', reason: 'Agenda + recordat.' },
+  { label: 'Alojamientos',    icon: '🏨', reason: 'Reservas directas' },
+  { label: 'Cafeterías',      icon: '☕', reason: 'QR + fidelidad' },
 ]
 
 const SORT_LIGHTHOUSE = [
@@ -118,7 +118,7 @@ export default function BusinessList() {
             <Target className="w-4 h-4 text-indigo-500" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-700 dark:text-gray-200">Rubros con mayor demanda de web</p>
+            <p className="text-xs font-bold text-slate-700 dark:text-gray-200">Rubros con mayor oportunidad de SaaS</p>
             <p className="text-[11px] text-slate-400">Clickea uno para pre-llenar la busqueda</p>
           </div>
         </div>

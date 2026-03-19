@@ -22,6 +22,7 @@ export function AppProvider({ children }) {
   const [showSaved, setShowSaved] = useState(false)
   const [showInteresados, setShowInteresados] = useState(false)
   const [isPaginating, setIsPaginating] = useState(false)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -169,6 +170,7 @@ export function AppProvider({ children }) {
       trackedBusinesses, setTrackedBusinesses, trackedCounts,
       showInteresados, setShowInteresados,
       isPaginating, setIsPaginating,
+      isAnalyzing, setIsAnalyzing,
       showDashboard, setShowDashboard,
       showSettings, setShowSettings,
       searchHistory, addSearchEntry,

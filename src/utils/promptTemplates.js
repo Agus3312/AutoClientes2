@@ -1,32 +1,124 @@
 /**
- * Generador de mensajes de WhatsApp dinámicos según tipo de negocio.
+ * Generador de mensajes de WhatsApp dinámicos orientados a venta de SaaS.
  */
 
-// Map of Google Places types → business type labels and service descriptions
+// Map of business types → SaaS opportunities
 const BUSINESS_TYPES = {
-  gym: { label: 'gimnasio', service: 'paginas web que ayudan a gestionar alumnos y cargar rutinas para los clientes' },
-  restaurant: { label: 'restaurante', service: 'paginas web con menu digital, reservas online y pedidos para delivery' },
-  cafe: { label: 'cafeteria', service: 'paginas web con carta digital, sistema de pedidos y programa de fidelidad' },
-  bakery: { label: 'panaderia', service: 'paginas web con catalogo de productos, pedidos anticipados y delivery' },
-  dentist: { label: 'consultorio dental', service: 'paginas web con sistema de turnos online y ficha de pacientes' },
-  doctor: { label: 'consultorio', service: 'paginas web con sistema de turnos online y portal para pacientes' },
-  lawyer: { label: 'estudio juridico', service: 'paginas web profesionales con formulario de consulta y seguimiento de casos' },
-  accounting: { label: 'estudio contable', service: 'paginas web con portal de clientes y gestion de documentos' },
-  beauty_salon: { label: 'salon de belleza', service: 'paginas web con reserva de turnos, galeria de trabajos y precios' },
-  hair_care: { label: 'peluqueria', service: 'paginas web con reserva de turnos, galeria de trabajos y precios' },
-  spa: { label: 'spa', service: 'paginas web con reserva de tratamientos, paquetes y gift cards' },
-  car_repair: { label: 'taller mecanico', service: 'paginas web con turnos, seguimiento de reparaciones y presupuestos online' },
-  car_dealer: { label: 'concesionaria', service: 'paginas web con catalogo de vehiculos, financiacion y cotizador online' },
-  real_estate_agency: { label: 'inmobiliaria', service: 'paginas web con buscador de propiedades, filtros y contacto directo' },
-  store: { label: 'tienda', service: 'paginas web con catalogo de productos, carrito de compras y envios' },
-  clothing_store: { label: 'tienda de ropa', service: 'paginas web con tienda online, lookbook y sistema de talles' },
-  electronics_store: { label: 'tienda de electronica', service: 'paginas web con e-commerce, comparador de productos y garantias' },
-  pet_store: { label: 'pet shop', service: 'paginas web con tienda online, turnos de peluqueria canina y tips' },
-  veterinary_care: { label: 'veterinaria', service: 'paginas web con turnos online, historial de mascotas y emergencias' },
-  school: { label: 'institucion educativa', service: 'paginas web con portal de alumnos, inscripcion online y noticias' },
-  lodging: { label: 'alojamiento', service: 'paginas web con motor de reservas, galeria y tarifas actualizadas' },
-  pharmacy: { label: 'farmacia', service: 'paginas web con catalogo de productos, pedidos y turnos de vacunacion' },
-  insurance_agency: { label: 'aseguradora', service: 'paginas web con cotizador online, gestion de polizas y siniestros' },
+  gym: {
+    label: 'gimnasio',
+    saas: 'sistema de gestion de socios, cobro automatico de cuotas y rutinas personalizadas por app',
+    pain: 'gestionar socios y cobros manualmente',
+  },
+  restaurant: {
+    label: 'restaurante',
+    saas: 'sistema de pedidos online, menu digital con QR, y gestion de delivery propio',
+    pain: 'depender de apps de delivery que cobran comisiones altas',
+  },
+  cafe: {
+    label: 'cafeteria',
+    saas: 'sistema de pedidos con QR, programa de fidelidad digital y gestion de stock',
+    pain: 'perder clientes recurrentes por no tener un programa de fidelidad',
+  },
+  bakery: {
+    label: 'panaderia',
+    saas: 'sistema de pedidos anticipados, catalogo digital y gestion de produccion diaria',
+    pain: 'perder ventas por no aceptar pedidos anticipados',
+  },
+  dentist: {
+    label: 'consultorio dental',
+    saas: 'sistema de turnos online, recordatorios automaticos por WhatsApp y ficha digital de pacientes',
+    pain: 'perder tiempo con llamadas para agendar turnos y pacientes que no asisten',
+  },
+  doctor: {
+    label: 'consultorio',
+    saas: 'sistema de turnos online, historia clinica digital y recordatorios automaticos',
+    pain: 'gestionar turnos por telefono y tener carpetas fisicas de pacientes',
+  },
+  lawyer: {
+    label: 'estudio juridico',
+    saas: 'sistema de gestion de casos, portal de clientes y facturacion automatica',
+    pain: 'hacer seguimiento manual de expedientes y perder tiempo en tareas administrativas',
+  },
+  accounting: {
+    label: 'estudio contable',
+    saas: 'portal de clientes para subir documentos, alertas de vencimientos y facturacion automatizada',
+    pain: 'recibir documentos por WhatsApp y perder tiempo organizandolos',
+  },
+  beauty_salon: {
+    label: 'salon de belleza',
+    saas: 'sistema de reservas online 24/7, recordatorios automaticos y gestion de agenda del equipo',
+    pain: 'perder reservas fuera de horario y tener cancelaciones de ultimo momento',
+  },
+  hair_care: {
+    label: 'peluqueria',
+    saas: 'sistema de turnos online, recordatorios por WhatsApp y historial de servicios por cliente',
+    pain: 'gestionar la agenda manualmente y perder clientes por no tener turnos disponibles visibles',
+  },
+  spa: {
+    label: 'spa',
+    saas: 'sistema de reserva de tratamientos, paquetes digitales, gift cards online y gestion de salas',
+    pain: 'no poder vender gift cards ni paquetes fuera del local',
+  },
+  car_repair: {
+    label: 'taller mecanico',
+    saas: 'sistema de turnos, seguimiento de reparaciones en tiempo real y presupuestos digitales',
+    pain: 'que los clientes llamen constantemente preguntando si ya esta listo su auto',
+  },
+  car_dealer: {
+    label: 'concesionaria',
+    saas: 'CRM automotor, cotizador online y seguimiento automatico de leads',
+    pain: 'perder leads por no hacer seguimiento a tiempo',
+  },
+  real_estate_agency: {
+    label: 'inmobiliaria',
+    saas: 'CRM inmobiliario, publicacion automatica en portales y matching de propiedades con clientes',
+    pain: 'publicar manualmente en cada portal y perder leads',
+  },
+  store: {
+    label: 'tienda',
+    saas: 'sistema de inventario, punto de venta digital y tienda online integrada',
+    pain: 'no saber que productos tienen en stock y perder ventas por no vender online',
+  },
+  clothing_store: {
+    label: 'tienda de ropa',
+    saas: 'catalogo digital, sistema de tallas inteligente y tienda online con envios',
+    pain: 'mostrar productos solo por Instagram sin poder vender directo',
+  },
+  electronics_store: {
+    label: 'tienda de electronica',
+    saas: 'e-commerce con comparador de productos, gestion de garantias y sistema de reparaciones',
+    pain: 'gestionar garantias y reparaciones en papel',
+  },
+  pet_store: {
+    label: 'pet shop',
+    saas: 'tienda online, turnos de peluqueria canina y recordatorios de vacunas/desparasitacion',
+    pain: 'no poder recordarle a los clientes cuando les toca la proxima vacuna de su mascota',
+  },
+  veterinary_care: {
+    label: 'veterinaria',
+    saas: 'sistema de turnos, historial clinico digital de mascotas y recordatorios de vacunas automaticos',
+    pain: 'gestionar fichas en papel y que los dueños olviden las vacunas',
+  },
+  school: {
+    label: 'institucion educativa',
+    saas: 'plataforma de gestion academica, comunicacion con padres y cobro de cuotas online',
+    pain: 'comunicarse con los padres por grupos de WhatsApp desorganizados',
+  },
+  lodging: {
+    label: 'alojamiento',
+    saas: 'motor de reservas directo, channel manager y check-in digital',
+    pain: 'pagar comisiones altas a Booking/Airbnb en cada reserva',
+  },
+  pharmacy: {
+    label: 'farmacia',
+    saas: 'sistema de gestion de stock, pedidos online y recordatorios de medicacion para clientes',
+    pain: 'no saber que productos estan por vencer o agotarse',
+  },
+  insurance_agency: {
+    label: 'aseguradora',
+    saas: 'CRM de polizas, cotizador online automatico y alertas de renovacion',
+    pain: 'perder renovaciones por no hacer seguimiento a tiempo',
+  },
 }
 
 function detectBusinessType(business, searchType = '') {
@@ -55,16 +147,19 @@ export function generateWhatsAppMessage(business, searchLocation = '', searchTyp
       .replace(/\{ubicacion\}/g, business.vicinity || searchLocation || '')
       .replace(/\{rating\}/g, business.rating || '')
       .replace(/\{resenas\}/g, business.user_ratings_total || '0')
+      .replace(/\{saas\}/g, detected?.saas || 'herramientas digitales para gestionar mejor su negocio')
+      .replace(/\{dolor\}/g, detected?.pain || 'perder tiempo en tareas manuales')
   }
 
   const detected = detectBusinessType(business, searchType)
   const label = detected?.label || 'negocio'
-  const service = detected?.service || 'paginas web profesionales que ayudan a captar mas clientes'
+  const pain = detected?.pain || 'gestionar todo manualmente y perder tiempo en tareas que se pueden automatizar'
+  const saas = detected?.saas || 'herramientas digitales que ayudan a automatizar y hacer crecer el negocio'
 
-  let msg = `Buenas! Estaba viendo ${label === 'negocio' ? 'negocios' : label + 's'} en Google Maps y me aparecio el suyo.\n`
-  msg += `Estoy contactando algunos porque estoy armando ${service}.\n`
-  msg += `Si quieren puedo mostrarles un boceto rapido de como podria verse una para ustedes, sin compromiso.\n`
-  msg += `Actualmente tienen pagina web o trabajan mas con Instagram y WhatsApp?`
+  let msg = `Buenas! Vi su ${label} en Google Maps y los contacto porque trabajo con negocios del rubro.\n`
+  msg += `Muchos nos cuentan que el mayor problema es ${pain}.\n`
+  msg += `Nosotros ofrecemos ${saas}.\n`
+  msg += `Les interesaria que les muestre como funciona en 5 minutos? Sin compromiso.`
 
   return msg
 }

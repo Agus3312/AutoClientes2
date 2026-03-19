@@ -63,7 +63,7 @@ export default function PromptPanel() {
     if (business) {
       setMessage(generateWhatsAppMessage(business, loc, businessType, userSettings.customTemplate || ''))
     }
-  }, [business?.place_id])
+  }, [business?.place_id, loc, businessType, userSettings.customTemplate])
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message)

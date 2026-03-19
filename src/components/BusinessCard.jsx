@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Star, MapPin, Globe, GitCompare, ScrollText, FileText, Loader2, Check, ExternalLink, Bookmark, Phone } from 'lucide-react'
+import { useState, memo } from 'react'
+import { Star, MapPin, Globe, GitCompare, ScrollText, FileText, Loader2, Check, ExternalLink, Bookmark, Phone, Zap } from 'lucide-react'
 import LighthousePanel from './LighthousePanel'
 import { useApp } from '../context/AppContext'
 import { exportToPDF } from '../utils/pdfExport'
@@ -44,8 +44,8 @@ const STATUS_LABELS = {
   interested: 'Quitar estado',
 }
 
-export default function BusinessCard({ business, index }) {
-  const { selectedBusiness, setSelectedBusiness, addToCompare, isInCompare, lighthouseData, loadingLighthouse, toggleSave, isSaved, cycleContactStatus, getContactStatus, searchQuery } = useApp()
+function BusinessCard({ business, index }) {
+  const { selectedBusiness, setSelectedBusiness, setBusinesses, addToCompare, isInCompare, lighthouseData, loadingLighthouse, toggleSave, isSaved, cycleContactStatus, getContactStatus, searchQuery, placesServiceRef } = useApp()
   const [isExporting, setIsExporting]       = useState(false)
   const [websiteLoading, setWebsiteLoading] = useState(false)
   const [photoError, setPhotoError]         = useState(false)
@@ -64,17 +64,23 @@ export default function BusinessCard({ business, index }) {
 
   const fetchWebsite = async e => {
     e.stopPropagation()
-    if (business.website) return
+    if (business.website || !placesServiceRef.current) return
     setWebsiteLoading(true)
-    const svc = new window.google.maps.places.PlacesService(document.createElement('div'))
-    svc.getDetails({ placeId: business.place_id, fields: ['website','formatted_phone_number'] }, (place, status) => {
-      setWebsiteLoading(false)
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        business.website = place.website || null
-        business.phone   = place.formatted_phone_number || null
-        setSelectedBusiness({ ...business })
+    placesServiceRef.current.getDetails(
+      { placeId: business.place_id, fields: ['website', 'formatted_phone_number', 'international_phone_number'] },
+      (place, status) => {
+        setWebsiteLoading(false)
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+          const website = place.website || null
+          const phone = place.international_phone_number || place.formatted_phone_number || null
+          // Update immutably via setBusinesses
+          setBusinesses(prev => prev.map(b =>
+            b.place_id === business.place_id ? { ...b, website, phone } : b
+          ))
+          setSelectedBusiness({ ...business, website, phone })
+        }
       }
-    })
+    )
   }
 
   const openPrompts = e => {
@@ -181,9 +187,24 @@ export default function BusinessCard({ business, index }) {
               <ScorePill score={scores.bestPractices} label="BP"   />
             </div>
           )}
+          {/* SaaS detection badges */}
+          {!isAnalyzing && scores?.detectedSaas?.length > 0 && (
+            <div className="flex gap-1 mt-1.5 flex-wrap">
+              {scores.detectedSaas.map(s => (
+                <span key={s.name} className="inline-flex items-center gap-1 text-[10px] font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 px-1.5 py-0.5 rounded-full">
+                  <Zap className="w-2.5 h-2.5" />{s.name}
+                </span>
+              ))}
+            </div>
+          )}
+          {!isAnalyzing && scores && !scores.error && !scores.noWebsite && scores.detectedSaas?.length === 0 && (
+            <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+              <Zap className="w-2.5 h-2.5" /> Sin SaaS detectado — oportunidad
+            </span>
+          )}
           {!isAnalyzing && scores?.noWebsite && (
-            <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-slate-400 bg-slate-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-              Sin web
+            <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full font-semibold">
+              <Zap className="w-3 h-3" /> Sin web — alta oportunidad SaaS
             </span>
           )}
           {!isAnalyzing && scores?.error && (
@@ -279,3 +300,5 @@ export default function BusinessCard({ business, index }) {
     </div>
   )
 }
+
+export default memo(BusinessCard)
