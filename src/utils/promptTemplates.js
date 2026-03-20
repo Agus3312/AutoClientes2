@@ -151,5 +151,5 @@ export function generateWhatsAppMessage(business, searchLocation = '', searchTyp
       .replace(/\{dolor\}/g, detected?.pain || 'perder tiempo en tareas manuales')
   }
 
-  return `Buenas! Estuve viendo lo que hacen y me pareció muy interesante. Me dedico a desarrollar páginas web y también herramientas para organizar y mejorar procesos en negocios. Si en algún momento quieren potenciar eso, puedo darles una mano 🙂`
+  return `Buenas! Estuve viendo lo que hacen y me pareció muy interesante. Me dedico a desarrollar herramientas para organizar y mejorar procesos en restaurantes. Si estan interesados en mejorar la gestion de su restaurante, no duden en contactarme.`
 }

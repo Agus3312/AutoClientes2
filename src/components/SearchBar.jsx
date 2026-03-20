@@ -42,6 +42,8 @@ export default function SearchBar() {
     isAnalyzing, setIsAnalyzing,
     addSearchEntry, addToast,
     searchHistory,
+    mapClickLocation, setMapClickLocation,
+    searchRadius, setSearchRadius,
   } = useApp()
 
   // Ref to cancel previous autoAnalyze runs
@@ -68,6 +70,19 @@ export default function SearchBar() {
       setSuggestedType('')
     }
   }, [suggestedType])
+
+  // When user clicks on map, update location input and coords
+  useEffect(() => {
+    if (mapClickLocation) {
+      setLocation(mapClickLocation.label)
+      locationCoordsRef.current = { lat: mapClickLocation.lat, lng: mapClickLocation.lng }
+    }
+  }, [mapClickLocation])
+
+  // Sync radius to context so MapView circle updates
+  useEffect(() => {
+    setSearchRadius(radius)
+  }, [radius])
 
   useEffect(() => {
     if (!window.google || !locationInputRef.current) return
@@ -106,6 +121,11 @@ export default function SearchBar() {
   }
 
   const handleSearch = async (typeOverride) => {
+    // Prevent concurrent searches
+    if (isSearching || isPaginating) return
+    // Clear any pending debounce
+    if (debounceRef.current) { clearTimeout(debounceRef.current); debounceRef.current = null }
+
     const type = typeOverride || businessType
     if (!type.trim() || !location.trim()) {
       addToast('Ingresa tipo de negocio y ciudad', 'error')
@@ -201,8 +221,8 @@ export default function SearchBar() {
             if (website) {
               setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: true }))
               try {
-                // Run Lighthouse + SaaS detection in parallel
-                const [data, saasTools] = await Promise.all([
+                // Run Lighthouse + SaaS/social detection in parallel
+                const [data, webData] = await Promise.all([
                   getLighthouseData(website, apiKey),
                   detectSaasTools(website),
                 ])
@@ -210,10 +230,20 @@ export default function SearchBar() {
                   // Merge SaaS tools from both sources (PageSpeed audits + HTML scan)
                   const allSaas = [...(data.detectedSaas || [])]
                   const seen = new Set(allSaas.map(s => s.name))
-                  for (const s of saasTools) {
+                  for (const s of webData.saas) {
                     if (!seen.has(s.name)) { allSaas.push(s); seen.add(s.name) }
                   }
                   setLighthouseData(prev => ({ ...prev, [biz.place_id]: { ...data, detectedSaas: allSaas } }))
+
+                  // Store contact info (email + socials) on the business
+                  const ci = webData.contactInfo
+                  if (ci.email || ci.socials.length > 0) {
+                    setBusinesses(prev => prev.map(b =>
+                      b.place_id === biz.place_id
+                        ? { ...b, email: ci.email || b.email, socials: ci.socials }
+                        : b
+                    ))
+                  }
                 }
               } catch (err) {
                 if (analyzeAbortRef.current === runId) {
@@ -226,6 +256,9 @@ export default function SearchBar() {
               }
             } else {
               setLighthouseData(prev => ({ ...prev, [biz.place_id]: { noWebsite: true, detectedSaas: [] } }))
+
+              // Even without website, try to extract social info from Google Maps page
+              // (won't work due to CORS, but keeps the structure consistent)
             }
             resolve()
           }
@@ -244,8 +277,10 @@ export default function SearchBar() {
   const handleClear = () => {
     analyzeAbortRef.current++
     setIsAnalyzing(false)
-    setBusinessType(''); setLocation('')
+    setLocation('')
     setBusinesses([]); setSelectedBusiness(null)
+    setMapClickLocation(null)
+    locationCoordsRef.current = null
   }
 
   return (

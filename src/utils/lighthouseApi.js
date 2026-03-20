@@ -1,3 +1,5 @@
+import { extractContactInfo } from './socialExtractor'
+
 const PAGESPEED_API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 
 // Known SaaS/tools patterns to detect in website HTML & network requests
@@ -40,18 +42,14 @@ const SAAS_SIGNATURES = [
 ]
 
 /**
- * Detect SaaS tools used by a website by fetching its HTML.
- * Returns array of { name, category } or empty array.
+ * Detect SaaS tools and extract contact info from website HTML.
+ * Returns { saas: [{ name, category }], contactInfo: { email, socials } }
  */
 export async function detectSaasTools(url) {
-  if (!url) return []
+  const empty = { saas: [], contactInfo: { email: null, socials: [] } }
+  if (!url) return empty
   const cleanUrl = url.startsWith('http') ? url : `https://${url}`
   try {
-    const resp = await fetch(cleanUrl, {
-      mode: 'no-cors',
-      signal: AbortSignal.timeout(5000),
-    })
-    // no-cors returns opaque response, so try cors first if possible
     let html = ''
     try {
       const corsResp = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(cleanUrl)}`, {
@@ -59,9 +57,10 @@ export async function detectSaasTools(url) {
       })
       if (corsResp.ok) html = await corsResp.text()
     } catch {
-      // CORS proxy failed, we'll rely on network requests from PageSpeed data
-      return []
+      return empty
     }
+
+    // SaaS detection
     const found = []
     const seen = new Set()
     for (const sig of SAAS_SIGNATURES) {
@@ -70,9 +69,13 @@ export async function detectSaasTools(url) {
         found.push({ name: sig.name, category: sig.category })
       }
     }
-    return found
+
+    // Contact info extraction (email + social media)
+    const contactInfo = extractContactInfo(html)
+
+    return { saas: found, contactInfo }
   } catch {
-    return []
+    return empty
   }
 }
 

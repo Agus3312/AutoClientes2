@@ -25,6 +25,8 @@ export function AppProvider({ children }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [mapClickLocation, setMapClickLocation] = useState(null) // { lat, lng, label }
+  const [searchRadius, setSearchRadius] = useState(5000)
 
   // Search history persisted
   const [searchHistory, setSearchHistory] = useState(() => {
@@ -177,6 +179,8 @@ export function AppProvider({ children }) {
       userSettings, setUserSettings,
       toasts, addToast,
       mapRef, placesServiceRef,
+      mapClickLocation, setMapClickLocation,
+      searchRadius, setSearchRadius,
     }}>
       {children}
     </AppContext.Provider>

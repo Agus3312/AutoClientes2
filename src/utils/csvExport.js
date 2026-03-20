@@ -6,8 +6,9 @@ const STATUS_LABELS = {
 
 export function exportToCSV(businesses, lighthouseData = {}, contactStatuses = {}) {
   const headers = [
-    'Nombre', 'Direccion', 'Rating', 'Resenas', 'Telefono',
-    'Sitio Web', 'Tiene Web', 'Performance', 'SEO', 'Accesibilidad',
+    'Nombre', 'Direccion', 'Rating', 'Resenas', 'Telefono', 'Email',
+    'Instagram', 'Facebook', 'Sitio Web', 'Tiene Web',
+    'Performance', 'SEO', 'Accesibilidad',
     'Buenas Practicas', 'Estado Contacto', 'Google Maps'
   ]
 
@@ -15,6 +16,7 @@ export function exportToCSV(businesses, lighthouseData = {}, contactStatuses = {
     const lh = lighthouseData[b.place_id]
     const hasScores = lh && !lh.error && !lh.noWebsite
     const status = contactStatuses[b.place_id]
+    const getSocial = (key) => b.socials?.find(s => s.key === key)?.url || ''
 
     return [
       b.name || '',
@@ -22,6 +24,9 @@ export function exportToCSV(businesses, lighthouseData = {}, contactStatuses = {
       b.rating || '',
       b.user_ratings_total || 0,
       b.phone || '',
+      b.email || '',
+      getSocial('instagram'),
+      getSocial('facebook'),
       b.website || '',
       b.website ? 'Si' : 'No',
       hasScores ? lh.performance : '',
