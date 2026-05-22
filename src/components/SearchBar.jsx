@@ -117,7 +117,7 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-800 px-5 py-3">
+    <div className="bg-white/80 dark:bg-surface-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 px-5 py-3">
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col sm:flex-row gap-2 items-center">
           <div className="relative flex-1 w-full">
@@ -184,7 +184,7 @@ export default function SearchBar() {
           </div>
 
           <div className="flex gap-2 w-full sm:w-auto">
-            <button onClick={() => handleSearch()} disabled={isSearching || isAnalyzing} className="btn-primary flex-1 sm:flex-none justify-center shadow-indigo-100">
+            <button onClick={() => handleSearch()} disabled={isSearching || isAnalyzing} className="btn-primary flex-1 sm:flex-none justify-center">
               {isSearching
                 ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Buscando…</span></>
                 : isAnalyzing

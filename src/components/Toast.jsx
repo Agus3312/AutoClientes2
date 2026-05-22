@@ -7,10 +7,10 @@ const ICONS = {
   info: Info,
 }
 
-const COLORS = {
-  success: 'bg-green-600 text-white',
-  error: 'bg-red-600 text-white',
-  info: 'bg-indigo-600 text-white',
+const STYLES = {
+  success: 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25',
+  error: 'bg-red-600 text-white shadow-lg shadow-red-600/25',
+  info: 'bg-brand-600 text-white shadow-lg shadow-brand-600/25',
 }
 
 export default function Toast() {
@@ -25,13 +25,13 @@ export default function Toast() {
         return (
           <div
             key={toast.id}
-            className={`flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg animate-slide-up text-sm font-medium ${COLORS[toast.type] || COLORS.info}`}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium animate-slide-up ${STYLES[toast.type] || STYLES.info}`}
           >
             <Icon className="w-4 h-4 flex-shrink-0" />
             <span>{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-1 opacity-70 hover:opacity-100"
+              className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
             >
               <X className="w-3.5 h-3.5" />
             </button>

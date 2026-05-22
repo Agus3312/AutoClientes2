@@ -7,26 +7,25 @@ export default function Navbar() {
   const { compareList, setShowCompare, savedBusinesses, setShowSaved, trackedCounts, setShowInteresados, setShowDashboard, setShowSettings, searchHistory } = useApp()
 
   return (
-    <nav className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-800 px-5 h-14 flex items-center justify-between sticky top-0 z-50">
+    <nav className="bg-white/80 dark:bg-surface-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 px-5 h-14 flex items-center justify-between sticky top-0 z-50">
       {/* Logo */}
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-200">
+        <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-sm shadow-brand-500/25">
           <Zap className="w-4 h-4 text-white fill-white" />
         </div>
         <span className="font-display font-bold text-slate-900 dark:text-white text-base tracking-tight">
-          Auto<span className="text-indigo-600">Clientes</span>
+          Auto<span className="text-brand-600 dark:text-brand-400">Clientes</span>
         </span>
-        <span className="hidden sm:inline text-[11px] font-medium text-slate-400 bg-slate-100 dark:bg-gray-800 dark:text-gray-500 px-2 py-0.5 rounded-full ml-1">
-          v1.0
+        <span className="hidden sm:inline text-[10px] font-semibold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/40 px-2 py-0.5 rounded-full ml-1 uppercase tracking-wider">
+          Pro
         </span>
       </div>
 
       {/* Right actions */}
       <div className="flex items-center gap-1.5">
-        {/* Dashboard */}
         <button
           onClick={() => setShowDashboard(true)}
-          className={`btn-ghost relative ${searchHistory.length > 0 ? 'text-indigo-500' : ''}`}
+          className={`btn-ghost relative ${searchHistory.length > 0 ? 'text-brand-500' : ''}`}
           title="Dashboard"
         >
           <BarChart3 className="w-4 h-4" />
@@ -35,11 +34,11 @@ export default function Navbar() {
         {compareList.length > 0 && (
           <button
             onClick={() => setShowCompare(true)}
-            className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-sm font-semibold px-3.5 py-1.5 rounded-xl transition-colors"
+            className="flex items-center gap-2 bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/30 text-brand-700 dark:text-brand-300 text-sm font-semibold px-3.5 py-1.5 rounded-xl transition-colors"
           >
             <GitCompare className="w-4 h-4" />
             <span className="hidden sm:inline">Comparar</span>
-            <span className="bg-indigo-600 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+            <span className="bg-brand-600 dark:bg-brand-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
               {compareList.length}
             </span>
           </button>
@@ -47,12 +46,12 @@ export default function Navbar() {
         {trackedCounts.total > 0 && (
           <button
             onClick={() => setShowInteresados(true)}
-            className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-sm font-semibold px-3 py-1.5 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold px-3 py-1.5 rounded-xl transition-colors"
             title="Ver seguimiento de contactos"
           >
             <Check className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Seguimiento</span>
-            <span className="bg-blue-600 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+            <span className="bg-blue-600 dark:bg-blue-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
               {trackedCounts.total}
             </span>
           </button>

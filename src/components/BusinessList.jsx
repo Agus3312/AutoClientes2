@@ -33,13 +33,16 @@ const SORT_GENERAL = [
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-3 animate-pulse">
+    <div className="card p-3.5">
       <div className="flex gap-3">
-        <div className="w-7 h-7 bg-slate-100 dark:bg-gray-800 rounded-xl flex-shrink-0" />
-        <div className="flex-1 space-y-2 pt-0.5">
-          <div className="h-3.5 bg-slate-100 dark:bg-gray-800 rounded-full w-3/4" />
-          <div className="h-3 bg-slate-100 dark:bg-gray-800 rounded-full w-1/2" />
-          <div className="h-3 bg-slate-100 dark:bg-gray-800 rounded-full w-full" />
+        <div className="w-9 h-9 skeleton rounded-xl flex-shrink-0" />
+        <div className="flex-1 space-y-2.5 pt-0.5">
+          <div className="h-3.5 skeleton rounded-full w-3/4" />
+          <div className="h-3 skeleton rounded-full w-1/2" />
+          <div className="flex gap-1.5">
+            <div className="h-5 skeleton rounded-full w-12" />
+            <div className="h-5 skeleton rounded-full w-10" />
+          </div>
         </div>
       </div>
     </div>
@@ -151,15 +154,15 @@ export default function BusinessList() {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-slate-50/90 dark:bg-gray-950/90 backdrop-blur-sm px-3 pt-2 pb-0 border-b border-slate-100 dark:border-gray-800">
+      <div className="sticky top-0 z-10 bg-surface-50/90 dark:bg-surface-950/90 backdrop-blur-md px-3 pt-2 pb-0 border-b border-slate-200/60 dark:border-slate-800/60">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-3.5 h-3.5 text-indigo-500" />
+            <TrendingUp className="w-3.5 h-3.5 text-brand-500" />
             <span className="text-xs font-semibold text-slate-600 dark:text-gray-300">
               {sorted.length} / {businesses.length} negocios
             </span>
             {isPaginating && (
-              <span className="flex items-center gap-1 text-[10px] text-indigo-500 font-medium">
+              <span className="flex items-center gap-1 text-[10px] text-brand-500 font-medium">
                 <Loader2 className="w-3 h-3 animate-spin" /> cargando mas...
               </span>
             )}
@@ -182,9 +185,9 @@ export default function BusinessList() {
 
         {/* Business Intelligence Bar */}
         {analyzedCount > 0 && (
-          <div className="mb-2 p-2.5 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40">
+          <div className="mb-2 p-2.5 bg-gradient-to-r from-brand-50 to-purple-50 dark:from-brand-950/30 dark:to-purple-950/30 rounded-xl border border-brand-100 dark:border-brand-900/40">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-indigo-700 dark:text-indigo-300">
+              <span className="font-semibold text-brand-700 dark:text-brand-300">
                 {noWebCount} de {analyzedCount} sin web ({noWebPct}%)
               </span>
               <span className="text-slate-500 dark:text-gray-400">
@@ -210,8 +213,8 @@ export default function BusinessList() {
               onClick={() => setFilterMode(f.key)}
               className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                 filterMode === f.key
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white dark:bg-gray-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:border-indigo-300'
+                  ? 'bg-brand-600 text-white border-brand-600'
+                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700'
               }`}
             >
               {f.icon}{f.label}
@@ -226,7 +229,7 @@ export default function BusinessList() {
               className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                 sortBy === opt.value
                   ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white dark:bg-gray-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:border-amber-300'
+                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700'
               }`}
             >
               {opt.label}
@@ -246,7 +249,7 @@ export default function BusinessList() {
               className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                 sortBy === opt.value
                   ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white dark:bg-gray-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:border-amber-300'
+                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700'
               }`}
             >
               {opt.label}

@@ -45,7 +45,7 @@ const STATUS_LABELS = {
   interested: 'Quitar estado',
 }
 
-const COLORS = ['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6']
+const COLORS = ['#6340f6','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6']
 
 function BusinessCard({ business, index }) {
   const { selectedBusiness, setSelectedBusiness, setBusinesses, addToCompare, isInCompare, lighthouseData, loadingLighthouse, toggleSave, isSaved, cycleContactStatus, getContactStatus, searchQuery, placesServiceRef } = useApp()
@@ -105,13 +105,13 @@ function BusinessCard({ business, index }) {
       className={`
         relative cursor-pointer rounded-2xl border transition-all duration-200 overflow-hidden
         ${isSelected
-          ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 shadow-md shadow-indigo-100/50'
-          : 'bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800 hover:shadow-md hover:border-slate-200 dark:hover:border-gray-700'}
+          ? 'bg-brand-50/80 dark:bg-brand-950/30 border-brand-200 dark:border-brand-800 shadow-card-hover'
+          : 'card hover:shadow-card-hover'}
       `}
     >
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-        style={{ backgroundColor: isSelected ? '#4f46e5' : COLORS[index % COLORS.length] }}
+        style={{ backgroundColor: isSelected ? '#6340f6' : COLORS[index % COLORS.length] }}
       />
 
       <div className="pl-4 pr-3 py-3 flex items-start gap-3">
