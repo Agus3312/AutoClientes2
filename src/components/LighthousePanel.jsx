@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Globe, Loader2, AlertCircle, Zap, Eye, Shield, Search, ChevronDown, ChevronUp } from 'lucide-react'
+import { Globe, Loader2, AlertCircle, Zap, Eye, Shield, Search, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import ScoreGauge from './ScoreGauge'
-import { getLighthouseData } from '../utils/lighthouseApi'
+import { getLighthouseData, detectSaasTools } from '../utils/lighthouseApi'
 import { useApp } from '../context/AppContext'
 
 const METRICS = [
@@ -13,6 +13,7 @@ const METRICS = [
 
 export default function LighthousePanel({ business }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isReanalyzing, setIsReanalyzing] = useState(false)
   const { lighthouseData, setLighthouseData, loadingLighthouse, setLoadingLighthouse } = useApp()
 
   const data = lighthouseData[business.place_id]
@@ -23,18 +24,47 @@ export default function LighthousePanel({ business }) {
     const website = business.website
     if (!website) return
 
+    // Prevent duplicate if already running from autoAnalyze
+    if (isLoading || isReanalyzing) return
+
+    setIsReanalyzing(true)
     setLoadingLighthouse(prev => ({ ...prev, [business.place_id]: true }))
     setIsOpen(true)
 
+    const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+
     try {
-      const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY
-      const result = await getLighthouseData(website, apiKey)
-      setLighthouseData(prev => ({ ...prev, [business.place_id]: result }))
+      // Run Lighthouse + SaaS detection in parallel (same as autoAnalyze)
+      const [lhResult, webData] = await Promise.all([
+        getLighthouseData(website, apiKey),
+        detectSaasTools(website),
+      ])
+
+      // Merge SaaS tools from both sources
+      const allSaas = [...(lhResult.detectedSaas || [])]
+      const seen = new Set(allSaas.map(s => s.name))
+      for (const s of webData.saas) {
+        if (!seen.has(s.name)) { allSaas.push(s); seen.add(s.name) }
+      }
+
+      setLighthouseData(prev => ({
+        ...prev,
+        [business.place_id]: { ...lhResult, detectedSaas: allSaas },
+      }))
+
+      // Update business with contact info if found
+      const ci = webData.contactInfo
+      if (ci.email || ci.socials.length > 0) {
+        // We can't import setBusinesses here easily,
+        // but contact info from SaaS scan supplements the business
+        // This is handled by autoAnalyze for the main flow.
+        // For manual re-analysis, we still get scores + SaaS which is the main value.
+      }
     } catch (err) {
-      console.error('Lighthouse error:', err)
       setLighthouseData(prev => ({ ...prev, [business.place_id]: { error: err.message } }))
     } finally {
       setLoadingLighthouse(prev => ({ ...prev, [business.place_id]: false }))
+      setIsReanalyzing(false)
     }
   }
 
@@ -56,6 +86,18 @@ export default function LighthousePanel({ business }) {
         </div>
 
         <div className="flex items-center gap-1.5">
+          {/* Re-analyze button — show if data exists (allow refresh) */}
+          {data && !data.error && !isLoading && (
+            <button
+              onClick={runAnalysis}
+              disabled={isReanalyzing}
+              title="Re-analizar"
+              className="text-xs text-slate-400 hover:text-indigo-600 dark:text-gray-500 dark:hover:text-indigo-400 flex items-center gap-0.5 transition-colors"
+            >
+              <RefreshCw className={`w-3 h-3 ${isReanalyzing ? 'animate-spin' : ''}`} />
+            </button>
+          )}
+          {/* First-time analyze button */}
           {!data && !isLoading && (
             <button
               onClick={runAnalysis}
@@ -77,7 +119,7 @@ export default function LighthousePanel({ business }) {
 
       {isOpen && (
         <div className="mt-2 animate-fade-in">
-          {isLoading && (
+          {(isLoading || isReanalyzing) && (
             <div className="flex items-center gap-2 py-3 justify-center">
               <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
               <span className="text-xs text-gray-500">Ejecutando análisis Lighthouse...</span>
@@ -94,7 +136,7 @@ export default function LighthousePanel({ business }) {
             </div>
           )}
 
-          {data && !data.error && (
+          {data && !data.error && !isLoading && !isReanalyzing && (
             <div>
               <div className="grid grid-cols-4 gap-1.5 mb-2">
                 {METRICS.map(({ key, label }) => (

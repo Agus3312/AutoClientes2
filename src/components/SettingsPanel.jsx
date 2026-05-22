@@ -11,7 +11,7 @@ const PLACEHOLDERS_HELP = [
 ]
 
 export default function SettingsPanel() {
-  const { showSettings, setShowSettings, userSettings, setUserSettings, addToast } = useApp()
+  const { showSettings, setShowSettings, userSettings, setUserSettings, addToast, clearLighthouseCache } = useApp()
   const [tab, setTab] = useState('message')
 
   if (!showSettings) return null
@@ -30,8 +30,8 @@ export default function SettingsPanel() {
     addToast('Template reseteado al default', 'info')
   }
 
-  const clearLighthouseCache = () => {
-    localStorage.removeItem('ac_lighthouse')
+  const clearLighthouseCacheHandler = () => {
+    clearLighthouseCache()
     addToast('Cache de Lighthouse borrado', 'success')
   }
 
@@ -109,7 +109,7 @@ export default function SettingsPanel() {
               </div>
 
               <div className="pt-2 border-t border-slate-100 dark:border-gray-800">
-                <button onClick={clearLighthouseCache} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-500 transition-colors">
+                <button onClick={clearLighthouseCacheHandler} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-500 transition-colors">
                   <Trash2 className="w-3 h-3" /> Borrar cache de Lighthouse
                 </button>
                 <p className="text-[10px] text-slate-400 mt-1">Fuerza re-analizar todos los sitios web</p>
