@@ -1,6 +1,7 @@
 import { useState, memo } from 'react'
-import { Star, MapPin, Globe, GitCompare, ScrollText, FileText, Loader2, Check, ExternalLink, Bookmark, Phone, Zap, Mail, Instagram, Facebook, Twitter, Linkedin, Youtube } from 'lucide-react'
+import { Star, MapPin, Globe, GitCompare, ScrollText, FileText, Loader2, Check, ExternalLink, Bookmark, Phone, Zap } from 'lucide-react'
 import LighthousePanel from './LighthousePanel'
+import { SocialChips, SocialActionButtons } from './SocialLinks'
 import { useApp } from '../context/AppContext'
 import { exportToPDF } from '../utils/pdfExport'
 import { generateWhatsAppMessage } from '../utils/promptTemplates'
@@ -28,7 +29,6 @@ function ScorePill({ score, label }) {
 function ContactTicks({ status }) {
   if (!status) return <Check className="w-3.5 h-3.5" />
   if (status === 'contacted') return <Check className="w-3.5 h-3.5 text-slate-400" />
-  // responded = 2 gray ticks, interested = 2 blue ticks
   const color = status === 'interested' ? 'text-blue-500' : 'text-slate-400'
   return (
     <span className={`flex items-center -space-x-1.5 ${color}`}>
@@ -38,34 +38,6 @@ function ContactTicks({ status }) {
   )
 }
 
-const SOCIAL_ICONS = {
-  instagram: Instagram,
-  facebook: Facebook,
-  twitter: Twitter,
-  linkedin: Linkedin,
-  youtube: Youtube,
-  tiktok: Zap, // Lucide doesn't have TikTok, use Zap as fallback
-}
-
-const SOCIAL_STYLES = {
-  instagram: 'text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 hover:bg-pink-100 dark:hover:bg-pink-900/30',
-  facebook: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30',
-  twitter: 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/30',
-  linkedin: 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30',
-  youtube: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30',
-  tiktok: 'text-slate-800 dark:text-slate-300 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 dark:hover:bg-gray-700',
-}
-
-// Styles for action column buttons (icon-only)
-const SOCIAL_BTN_STYLES = {
-  instagram: 'text-pink-500 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20',
-  facebook: 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20',
-  twitter: 'text-sky-500 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20',
-  linkedin: 'text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20',
-  youtube: 'text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20',
-  tiktok: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800',
-}
-
 const STATUS_LABELS = {
   null: 'Marcar como contactado',
   contacted: 'Marcar como respondio',
@@ -73,19 +45,20 @@ const STATUS_LABELS = {
   interested: 'Quitar estado',
 }
 
+const COLORS = ['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6']
+
 function BusinessCard({ business, index }) {
   const { selectedBusiness, setSelectedBusiness, setBusinesses, addToCompare, isInCompare, lighthouseData, loadingLighthouse, toggleSave, isSaved, cycleContactStatus, getContactStatus, searchQuery, placesServiceRef } = useApp()
   const [isExporting, setIsExporting]       = useState(false)
   const [websiteLoading, setWebsiteLoading] = useState(false)
   const [photoError, setPhotoError]         = useState(false)
 
-  const isSelected     = selectedBusiness?.place_id === business.place_id
-  const inCompare      = isInCompare(business.place_id)
-  const scores         = lighthouseData[business.place_id]
-  const isAnalyzing    = loadingLighthouse[business.place_id]
+  const isSelected  = selectedBusiness?.place_id === business.place_id
+  const inCompare   = isInCompare(business.place_id)
+  const scores      = lighthouseData[business.place_id]
+  const isAnalyzing = loadingLighthouse[business.place_id]
 
-  const COLORS  = ['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6']
-  const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${business.place_id}`
+  const mapsUrl  = `https://www.google.com/maps/place/?q=place_id:${business.place_id}`
   const photoRef = business.photos?.[0]?.photo_reference
   const photoUrl = photoRef
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=80&photo_reference=${photoRef}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
@@ -102,7 +75,6 @@ function BusinessCard({ business, index }) {
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
           const website = place.website || null
           const phone = place.international_phone_number || place.formatted_phone_number || null
-          // Update immutably via setBusinesses
           setBusinesses(prev => prev.map(b =>
             b.place_id === business.place_id ? { ...b, website, phone } : b
           ))
@@ -110,11 +82,6 @@ function BusinessCard({ business, index }) {
         }
       }
     )
-  }
-
-  const openPrompts = e => {
-    e.stopPropagation()
-    setSelectedBusiness(business)
   }
 
   const handleWhatsApp = e => {
@@ -142,7 +109,6 @@ function BusinessCard({ business, index }) {
           : 'bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800 hover:shadow-md hover:border-slate-200 dark:hover:border-gray-700'}
       `}
     >
-      {/* Left color bar */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
         style={{ backgroundColor: isSelected ? '#4f46e5' : COLORS[index % COLORS.length] }}
@@ -197,7 +163,7 @@ function BusinessCard({ business, index }) {
             </div>
           )}
 
-          {/* Score pills / estados lighthouse */}
+          {/* Score pills */}
           {isAnalyzing && (
             <div className="flex items-center gap-1.5 mt-2">
               <Loader2 className="w-3 h-3 animate-spin text-indigo-400" />
@@ -212,7 +178,6 @@ function BusinessCard({ business, index }) {
               <ScorePill score={scores.bestPractices} label="BP"   />
             </div>
           )}
-          {/* SaaS detection badges */}
           {!isAnalyzing && scores?.detectedSaas?.length > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {scores.detectedSaas.map(s => (
@@ -238,7 +203,6 @@ function BusinessCard({ business, index }) {
             </span>
           )}
 
-          {/* Website link */}
           {business.website && (
             <a
               href={business.website}
@@ -252,26 +216,7 @@ function BusinessCard({ business, index }) {
             </a>
           )}
 
-          {/* Contact channels */}
-          {(business.email || business.socials?.length > 0) && (
-            <div className="flex gap-1 mt-1.5 flex-wrap" onClick={e => e.stopPropagation()}>
-              {business.email && (
-                <a href={`mailto:${business.email}`} title={business.email}
-                  className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-1.5 py-0.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors">
-                  <Mail className="w-2.5 h-2.5" />Email
-                </a>
-              )}
-              {business.socials?.map(s => {
-                const Icon = SOCIAL_ICONS[s.key] || Globe
-                return (
-                  <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer" title={`${s.label}: @${s.handle}`}
-                    className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full transition-colors ${SOCIAL_STYLES[s.key] || 'text-slate-600 bg-slate-50 dark:text-gray-400 dark:bg-gray-800'}`}>
-                    <Icon className="w-2.5 h-2.5" />{s.label}
-                  </a>
-                )
-              })}
-            </div>
-          )}
+          <SocialChips email={business.email} socials={business.socials} />
         </div>
 
         {/* Action column */}
@@ -284,11 +229,10 @@ function BusinessCard({ business, index }) {
             {inCompare ? <Check className="w-3.5 h-3.5" /> : <GitCompare className="w-3.5 h-3.5" />}
           </button>
 
-          <button onClick={openPrompts} title="Generar prompts" className="btn-ghost">
+          <button onClick={() => setSelectedBusiness(business)} title="Generar prompts" className="btn-ghost">
             <ScrollText className="w-3.5 h-3.5" />
           </button>
 
-          {/* Guardar */}
           <button
             onClick={e => { e.stopPropagation(); toggleSave(business) }}
             title={isSaved(business.place_id) ? 'Quitar de guardados' : 'Guardar negocio'}
@@ -297,7 +241,6 @@ function BusinessCard({ business, index }) {
             <Bookmark className={`w-3.5 h-3.5 ${isSaved(business.place_id) ? 'fill-amber-500' : ''}`} />
           </button>
 
-          {/* Contact status ticks */}
           <button
             onClick={e => { e.stopPropagation(); cycleContactStatus(business) }}
             title={STATUS_LABELS[getContactStatus(business.place_id)]}
@@ -312,7 +255,6 @@ function BusinessCard({ business, index }) {
             <ContactTicks status={getContactStatus(business.place_id)} />
           </button>
 
-          {/* WhatsApp */}
           {business.phone && (
             <button
               onClick={handleWhatsApp}
@@ -323,36 +265,7 @@ function BusinessCard({ business, index }) {
             </button>
           )}
 
-          {/* Email */}
-          {business.email && (
-            <a
-              href={`mailto:${business.email}`}
-              onClick={e => e.stopPropagation()}
-              title={`Email: ${business.email}`}
-              className="btn-ghost text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-            >
-              <Mail className="w-3.5 h-3.5" />
-            </a>
-          )}
-
-          {/* Social media buttons */}
-          {business.socials?.map(s => {
-            const Icon = SOCIAL_ICONS[s.key] || Globe
-            const colorClass = SOCIAL_BTN_STYLES[s.key] || ''
-            return (
-              <a
-                key={s.key}
-                href={s.key === 'instagram' ? `https://ig.me/m/${s.handle}` : s.key === 'facebook' ? `https://m.me/${s.handle}` : s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
-                title={`${s.label}: @${s.handle}`}
-                className={`btn-ghost ${colorClass}`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-              </a>
-            )
-          })}
+          <SocialActionButtons email={business.email} socials={business.socials} />
 
           {!business.website && (
             <button onClick={fetchWebsite} disabled={websiteLoading} title="Obtener web" className="btn-ghost">
@@ -368,7 +281,6 @@ function BusinessCard({ business, index }) {
         </div>
       </div>
 
-      {/* Lighthouse expandable */}
       {isSelected && (
         <div className="border-t border-indigo-100 dark:border-indigo-900/50 mx-3 pb-3">
           <LighthousePanel business={business} />

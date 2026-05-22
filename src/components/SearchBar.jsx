@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Search, MapPin, Loader2, X, Sparkles, Radar, Clock } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getLighthouseData, detectSaasTools } from '../utils/lighthouseApi'
+import { useBusinessSearch } from '../hooks/useBusinessSearch'
 
 const QUICK_SEARCHES = [
   { label: 'Cafeterías', icon: '☕' },
@@ -29,28 +29,19 @@ export default function SearchBar() {
   const locationCoordsRef = useRef(null)
 
   const [showHistory, setShowHistory] = useState(false)
-  const typeInputRef = useRef(null)
+  const debounceRef = useRef(null)
 
   const {
-    setBusinesses, setIsSearching, isSearching,
-    setMapCenter, setMapZoom, setSelectedBusiness,
-    placesServiceRef, setSearchQuery,
-    setLighthouseData, setLoadingLighthouse,
-    setFilterMode, setSortBy,
+    isSearching, isPaginating, isAnalyzing,
     suggestedType, setSuggestedType,
-    isPaginating, setIsPaginating,
-    isAnalyzing, setIsAnalyzing,
-    addSearchEntry, addToast,
     searchHistory,
     mapClickLocation, setMapClickLocation,
     searchRadius, setSearchRadius,
+    setBusinesses, setSelectedBusiness,
   } = useApp()
 
-  // Ref to cancel previous autoAnalyze runs
-  const analyzeAbortRef = useRef(0)
-  const debounceRef = useRef(null)
+  const { search, cancelAnalysis } = useBusinessSearch()
 
-  // Unique recent search types (deduplicated, max 8)
   const recentSearchTypes = useMemo(() => {
     const seen = new Set()
     return searchHistory
@@ -63,7 +54,6 @@ export default function SearchBar() {
       .slice(0, 8)
   }, [searchHistory])
 
-  // Cuando el usuario clickea un chip del panel vacío, se pre-llena el input
   useEffect(() => {
     if (suggestedType) {
       setBusinessType(suggestedType)
@@ -71,7 +61,6 @@ export default function SearchBar() {
     }
   }, [suggestedType])
 
-  // When user clicks on map, update location input and coords
   useEffect(() => {
     if (mapClickLocation) {
       setLocation(mapClickLocation.label)
@@ -79,7 +68,6 @@ export default function SearchBar() {
     }
   }, [mapClickLocation])
 
-  // Sync radius to context so MapView circle updates
   useEffect(() => {
     setSearchRadius(radius)
   }, [radius])
@@ -102,170 +90,16 @@ export default function SearchBar() {
     })
   }, [window.google])
 
-  const fetchNextPages = (pagination, pageCount = 1) => {
-    if (!pagination?.hasNextPage || pageCount >= 2) {
-      setIsPaginating(false)
-      return
-    }
-    setTimeout(() => {
-      pagination.nextPage((moreResults, moreStatus, morePagination) => {
-        if (moreStatus === window.google.maps.places.PlacesServiceStatus.OK && moreResults?.length) {
-          setBusinesses(prev => [...prev, ...moreResults])
-          autoAnalyze(moreResults)
-          fetchNextPages(morePagination, pageCount + 1)
-        } else {
-          setIsPaginating(false)
-        }
-      })
-    }, 2000)
-  }
-
-  const handleSearch = async (typeOverride) => {
-    // Prevent concurrent searches
-    if (isSearching || isPaginating) return
-    // Clear any pending debounce
-    if (debounceRef.current) { clearTimeout(debounceRef.current); debounceRef.current = null }
-
+  const handleSearch = (typeOverride) => {
     const type = typeOverride || businessType
-    if (!type.trim() || !location.trim()) {
-      addToast('Ingresa tipo de negocio y ciudad', 'error')
-      return
-    }
-    if (!placesServiceRef.current) {
-      addToast('El mapa aun no cargo. Espera un momento.', 'error')
-      return
-    }
-    analyzeAbortRef.current++ // Cancel any running autoAnalyze
-    setIsSearching(true)
-    setSelectedBusiness(null)
-    setSearchQuery({ type, location })
-
-    const searchOpts = locationCoordsRef.current
-      ? {
-          location: new window.google.maps.LatLng(locationCoordsRef.current.lat, locationCoordsRef.current.lng),
-          radius,
-          keyword: type,
-        }
-      : { query: `${type} en ${location}` }
-
-    const searchMethod = locationCoordsRef.current ? 'nearbySearch' : 'textSearch'
-
-    placesServiceRef.current[searchMethod](searchOpts, (results, status, pagination) => {
-      setIsSearching(false)
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
-        setBusinesses(results)
-        setLoadingLighthouse({})
-        setFilterMode('all')
-        setSortBy(null)
-        const loc = results[0].geometry?.location
-        if (loc) { setMapCenter({ lat: loc.lat(), lng: loc.lng() }); setMapZoom(14) }
-        autoAnalyze(results)
-        addToast(`${results.length} negocios encontrados`, 'success')
-
-        // Save to search history
-        addSearchEntry({
-          date: new Date().toISOString(),
-          type, location,
-          totalResults: results.length,
-        })
-
-        // Fetch all remaining pages (up to 60 results total)
-        if (pagination?.hasNextPage) {
-          setIsPaginating(true)
-          fetchNextPages(pagination)
-        }
-      } else {
-        setBusinesses([])
-        addToast('Sin resultados para esta busqueda', 'error')
-      }
+    search({
+      type,
+      location,
+      coords: locationCoordsRef.current,
+      radius,
+      isSearching,
+      isPaginating,
     })
-  }
-
-  const autoAnalyze = async (list) => {
-    const runId = ++analyzeAbortRef.current
-    const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    const svc = placesServiceRef.current
-    setIsAnalyzing(true)
-
-    for (const biz of list) {
-      // Stop if a newer search was triggered
-      if (analyzeAbortRef.current !== runId) return
-
-      await new Promise(resolve => {
-        svc.getDetails(
-          { placeId: biz.place_id, fields: ['website', 'formatted_phone_number', 'international_phone_number'] },
-          async (place, st) => {
-            // Stop if a newer search was triggered
-            if (analyzeAbortRef.current !== runId) { resolve(); return }
-
-            const website = st === window.google.maps.places.PlacesServiceStatus.OK
-              ? (place.website || null) : null
-            const phone = st === window.google.maps.places.PlacesServiceStatus.OK
-              ? (place.international_phone_number || place.formatted_phone_number || null) : null
-
-            // Update business immutably (never mutate biz directly)
-            setBusinesses(prev => prev.map(b =>
-              b.place_id === biz.place_id ? { ...b, website, phone } : b
-            ))
-
-            // Use React state instead of direct localStorage read to avoid stale data
-            const cached = lighthouseData[biz.place_id]
-
-            // Use cached Lighthouse data if available
-            if (cached && !cached.error && !cached.noWebsite) {
-              resolve()
-              return
-            }
-
-            if (website) {
-              setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: true }))
-              try {
-                // Run Lighthouse + SaaS/social detection in parallel
-                const [data, webData] = await Promise.all([
-                  getLighthouseData(website, apiKey),
-                  detectSaasTools(website),
-                ])
-                if (analyzeAbortRef.current === runId) {
-                  // Merge SaaS tools from both sources (PageSpeed audits + HTML scan)
-                  const allSaas = [...(data.detectedSaas || [])]
-                  const seen = new Set(allSaas.map(s => s.name))
-                  for (const s of webData.saas) {
-                    if (!seen.has(s.name)) { allSaas.push(s); seen.add(s.name) }
-                  }
-                  setLighthouseData(prev => ({ ...prev, [biz.place_id]: { ...data, detectedSaas: allSaas } }))
-
-                  // Store contact info (email + socials) on the business
-                  const ci = webData.contactInfo
-                  if (ci.email || ci.socials.length > 0) {
-                    setBusinesses(prev => prev.map(b =>
-                      b.place_id === biz.place_id
-                        ? { ...b, email: ci.email || b.email, socials: ci.socials }
-                        : b
-                    ))
-                  }
-                }
-              } catch (err) {
-                if (analyzeAbortRef.current === runId) {
-                  setLighthouseData(prev => ({ ...prev, [biz.place_id]: { error: err.message } }))
-                }
-              } finally {
-                if (analyzeAbortRef.current === runId) {
-                  setLoadingLighthouse(prev => ({ ...prev, [biz.place_id]: false }))
-                }
-              }
-            } else {
-              setLighthouseData(prev => ({ ...prev, [biz.place_id]: { noWebsite: true, detectedSaas: [] } }))
-
-              // Even without website, try to extract social info from Google Maps page
-              // (won't work due to CORS, but keeps the structure consistent)
-            }
-            resolve()
-          }
-        )
-      })
-      await new Promise(r => setTimeout(r, 300))
-    }
-    if (analyzeAbortRef.current === runId) setIsAnalyzing(false)
   }
 
   const handleSearchDebounced = (typeOverride) => {
@@ -274,10 +108,10 @@ export default function SearchBar() {
   }
 
   const handleClear = () => {
-    analyzeAbortRef.current++
-    setIsAnalyzing(false)
+    cancelAnalysis()
     setLocation('')
-    setBusinesses([]); setSelectedBusiness(null)
+    setBusinesses([])
+    setSelectedBusiness(null)
     setMapClickLocation(null)
     locationCoordsRef.current = null
   }
@@ -285,13 +119,10 @@ export default function SearchBar() {
   return (
     <div className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-800 px-5 py-3">
       <div className="max-w-5xl mx-auto">
-        {/* Search inputs */}
         <div className="flex flex-col sm:flex-row gap-2 items-center">
-          {/* Business type */}
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
-              ref={typeInputRef}
               type="text"
               placeholder="Tipo de negocio…"
               value={businessType}
@@ -301,7 +132,6 @@ export default function SearchBar() {
               onKeyDown={e => e.key === 'Enter' && handleSearchDebounced()}
               className="input-field pl-10 shadow-sm"
             />
-            {/* Search history dropdown */}
             {showHistory && recentSearchTypes.length > 0 && !businessType && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
                 <p className="text-[11px] text-slate-400 dark:text-gray-500 px-3 pt-2 pb-1 font-medium">Busquedas recientes</p>
@@ -325,10 +155,8 @@ export default function SearchBar() {
             )}
           </div>
 
-          {/* Divider */}
           <div className="hidden sm:flex items-center text-slate-300 dark:text-gray-700 text-lg font-light select-none">·</div>
 
-          {/* Location */}
           <div className="relative flex-1 w-full">
             <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
@@ -342,7 +170,6 @@ export default function SearchBar() {
             />
           </div>
 
-          {/* Radius selector */}
           <div className="relative flex-shrink-0 w-full sm:w-auto">
             <Radar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <select
@@ -356,7 +183,6 @@ export default function SearchBar() {
             </select>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-2 w-full sm:w-auto">
             <button onClick={() => handleSearch()} disabled={isSearching || isAnalyzing} className="btn-primary flex-1 sm:flex-none justify-center shadow-indigo-100">
               {isSearching
@@ -373,7 +199,6 @@ export default function SearchBar() {
           </div>
         </div>
 
-        {/* Quick searches */}
         <div className="flex gap-2 mt-2.5 overflow-x-auto pb-0.5">
           {QUICK_SEARCHES.map(q => (
             <button
