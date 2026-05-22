@@ -2,6 +2,10 @@
  * Generador de mensajes de WhatsApp dinámicos orientados a venta de SaaS.
  */
 
+function normalize(str) {
+  return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
 // Map of business types → SaaS opportunities
 const BUSINESS_TYPES = {
   gym: {
@@ -122,17 +126,17 @@ const BUSINESS_TYPES = {
 }
 
 function detectBusinessType(business, searchType = '') {
-  const search = searchType.toLowerCase()
+  const search = normalize(searchType)
   for (const [key, val] of Object.entries(BUSINESS_TYPES)) {
-    if (search.includes(key) || search.includes(val.label)) return val
+    if (search.includes(key) || search.includes(normalize(val.label))) return val
   }
   const types = business.types || []
   for (const t of types) {
     if (BUSINESS_TYPES[t]) return BUSINESS_TYPES[t]
   }
-  const nameLower = (business.name || '').toLowerCase()
+  const nameLower = normalize(business.name)
   for (const [, val] of Object.entries(BUSINESS_TYPES)) {
-    if (nameLower.includes(val.label)) return val
+    if (nameLower.includes(normalize(val.label))) return val
   }
   return null
 }
@@ -151,5 +155,11 @@ export function generateWhatsAppMessage(business, searchLocation = '', searchTyp
       .replace(/\{dolor\}/g, detected?.pain || 'perder tiempo en tareas manuales')
   }
 
-  return `Buenas! Estuve viendo lo que hacen y me pareció muy interesante. Me dedico a desarrollar herramientas para organizar y mejorar procesos en restaurantes. Si estan interesados en mejorar la gestion de su restaurante, no duden en contactarme.`
+  const detected = detectBusinessType(business, searchType)
+  const name = business.name || 'su negocio'
+  const rubro = detected?.label || 'negocio'
+  const saas = detected?.saas || 'herramientas digitales para gestionar mejor su negocio'
+  const pain = detected?.pain || 'perder tiempo en tareas manuales'
+
+  return `Hola ${name}! Vi lo que hacen y me parecio muy interesante. Me dedico a ofrecer ${saas} para ${rubro}s. Se que ${pain} es un problema comun, y podriamos ayudarlo con eso. Si le interesa mejorar la gestion de su ${rubro}, no dude en contactarme.`
 }
