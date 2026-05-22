@@ -14,7 +14,7 @@ const COLORS = {
 }
 
 export default function Toast() {
-  const { toasts, setToasts } = useApp()
+  const { toasts, removeToast } = useApp()
 
   if (toasts.length === 0) return null
 
@@ -30,7 +30,7 @@ export default function Toast() {
             <Icon className="w-4 h-4 flex-shrink-0" />
             <span>{toast.message}</span>
             <button
-              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+              onClick={() => removeToast(toast.id)}
               className="ml-1 opacity-70 hover:opacity-100"
             >
               <X className="w-3.5 h-3.5" />

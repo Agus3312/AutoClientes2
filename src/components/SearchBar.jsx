@@ -208,12 +208,11 @@ export default function SearchBar() {
               b.place_id === biz.place_id ? { ...b, website, phone } : b
             ))
 
-            // Read cache fresh each iteration to avoid stale data
-            const cached = JSON.parse(localStorage.getItem('ac_lighthouse') || '{}')
+            // Use React state instead of direct localStorage read to avoid stale data
+            const cached = lighthouseData[biz.place_id]
 
             // Use cached Lighthouse data if available
-            if (cached[biz.place_id] && !cached[biz.place_id].error) {
-              setLighthouseData(prev => ({ ...prev, [biz.place_id]: cached[biz.place_id] }))
+            if (cached && !cached.error && !cached.noWebsite) {
               resolve()
               return
             }

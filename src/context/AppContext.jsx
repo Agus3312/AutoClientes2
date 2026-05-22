@@ -1,137 +1,42 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback, useRef } from 'react'
+import { useLighthouse } from '../hooks/useLighthouse'
+import { useContactPipeline } from '../hooks/useContactPipeline'
+import { useSaved } from '../hooks/useSaved'
+import { useSearchHistory } from '../hooks/useSearchHistory'
+import { useUserSettings } from '../hooks/useUserSettings'
 
 const AppContext = createContext()
 
 export function AppProvider({ children }) {
+  // Core business state
   const [businesses, setBusinesses] = useState([])
   const [selectedBusiness, setSelectedBusiness] = useState(null)
-  const [compareList, setCompareList] = useState([])
-  const [lighthouseData, setLighthouseData] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ac_lighthouse') || '{}') } catch { return {} }
-  })
-  const [loadingLighthouse, setLoadingLighthouse] = useState({})
   const [isSearching, setIsSearching] = useState(false)
-  const [showCompare, setShowCompare] = useState(false)
-  const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 })
-  const [mapZoom, setMapZoom] = useState(13)
-  const [searchQuery, setSearchQuery] = useState({ type: '', location: '' })
-  const [suggestedType, setSuggestedType] = useState('')  // tipo sugerido desde el panel vacío
-  const [filterMode, setFilterMode] = useState('all') // 'all' | 'no-website' | 'has-website'
-  const [sortBy, setSortBy] = useState(null)          // 'performance'|'seo'|'accessibility'|'bestPractices'
-  const [sortOrder, setSortOrder] = useState('asc')  // 'asc' | 'desc'
-  const [showSaved, setShowSaved] = useState(false)
-  const [showInteresados, setShowInteresados] = useState(false)
   const [isPaginating, setIsPaginating] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [showDashboard, setShowDashboard] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
-  const [mapClickLocation, setMapClickLocation] = useState(null) // { lat, lng, label }
+  const [searchQuery, setSearchQuery] = useState({ type: '', location: '' })
+  const [suggestedType, setSuggestedType] = useState('')
+  const [filterMode, setFilterMode] = useState('all')
+  const [sortBy, setSortBy] = useState(null)
+  const [sortOrder, setSortOrder] = useState('asc')
+
+  // Map state
+  const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 })
+  const [mapZoom, setMapZoom] = useState(13)
+  const [mapClickLocation, setMapClickLocation] = useState(null)
   const [searchRadius, setSearchRadius] = useState(5000)
-
-  // Search history persisted
-  const [searchHistory, setSearchHistory] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ac_search_history') || '[]') } catch { return [] }
-  })
-  useEffect(() => {
-    localStorage.setItem('ac_search_history', JSON.stringify(searchHistory))
-  }, [searchHistory])
-  const addSearchEntry = useCallback((entry) => {
-    setSearchHistory(prev => [entry, ...prev].slice(0, 20))
-  }, [])
-
-  // User settings persisted
-  const [userSettings, setUserSettings] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ac_user_settings') || '{}') } catch { return {} }
-  })
-  useEffect(() => {
-    localStorage.setItem('ac_user_settings', JSON.stringify(userSettings))
-  }, [userSettings])
-
-  // Toast notifications
-  const [toasts, setToasts] = useState([])
-  const addToast = useCallback((message, type = 'info') => {
-    const id = Date.now()
-    setToasts(prev => [...prev, { id, message, type }])
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500)
-  }, [])
-
-  const [savedBusinesses, setSavedBusinesses] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ac_saved') || '[]') } catch { return [] }
-  })
-  useEffect(() => {
-    localStorage.setItem('ac_saved', JSON.stringify(savedBusinesses))
-  }, [savedBusinesses])
-
-  useEffect(() => {
-    localStorage.setItem('ac_lighthouse', JSON.stringify(lighthouseData))
-  }, [lighthouseData])
-
-  const toggleSave = useCallback((business) => {
-    setSavedBusinesses(prev => {
-      const exists = prev.find(b => b.place_id === business.place_id)
-      return exists ? prev.filter(b => b.place_id !== business.place_id) : [...prev, business]
-    })
-  }, [])
-  const isSaved = useCallback((placeId) => savedBusinesses.some(b => b.place_id === placeId), [savedBusinesses])
-
-  // Contact status: null → 'contacted' → 'responded' → 'interested' → null
-  // trackedBusinesses stores business data for any business with a status
-  const [contactStatuses, setContactStatuses] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ac_contact_statuses') || '{}') } catch { return {} }
-  })
-  const [trackedBusinesses, setTrackedBusinesses] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ac_tracked') || '[]') } catch { return [] }
-  })
-  useEffect(() => {
-    localStorage.setItem('ac_contact_statuses', JSON.stringify(contactStatuses))
-  }, [contactStatuses])
-  useEffect(() => {
-    localStorage.setItem('ac_tracked', JSON.stringify(trackedBusinesses))
-  }, [trackedBusinesses])
-
-  const cycleContactStatus = useCallback((business) => {
-    const order = [null, 'contacted', 'responded', 'interested']
-    setContactStatuses(prev => {
-      const current = prev[business.place_id] || null
-      const idx = order.indexOf(current)
-      const next = order[(idx + 1) % order.length]
-      const updated = { ...prev }
-      if (next === null) {
-        delete updated[business.place_id]
-        setTrackedBusinesses(p => p.filter(b => b.place_id !== business.place_id))
-      } else {
-        updated[business.place_id] = next
-        setTrackedBusinesses(p => {
-          if (p.some(b => b.place_id === business.place_id)) return p
-          return [...p, business]
-        })
-      }
-      return updated
-    })
-  }, [])
-
-  const clearContactStatus = useCallback((placeId) => {
-    setContactStatuses(prev => {
-      const updated = { ...prev }
-      delete updated[placeId]
-      return updated
-    })
-    setTrackedBusinesses(p => p.filter(b => b.place_id !== placeId))
-  }, [])
-
-  const getContactStatus = useCallback((placeId) => contactStatuses[placeId] || null, [contactStatuses])
-
-  // Derived counts
-  const trackedCounts = {
-    contacted: trackedBusinesses.filter(b => contactStatuses[b.place_id] === 'contacted').length,
-    responded: trackedBusinesses.filter(b => contactStatuses[b.place_id] === 'responded').length,
-    interested: trackedBusinesses.filter(b => contactStatuses[b.place_id] === 'interested').length,
-    total: trackedBusinesses.length,
-  }
-
   const mapRef = useRef(null)
   const placesServiceRef = useRef(null)
 
+  // UI panels
+  const [showCompare, setShowCompare] = useState(false)
+  const [showSaved, setShowSaved] = useState(false)
+  const [showInteresados, setShowInteresados] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+
+  // Compare
+  const [compareList, setCompareList] = useState([])
   const addToCompare = useCallback((business) => {
     setCompareList(prev => {
       const exists = prev.find(b => b.place_id === business.place_id)
@@ -140,47 +45,89 @@ export function AppProvider({ children }) {
       return [...prev, business]
     })
   }, [])
+  const isInCompare = useCallback((placeId) => compareList.some(b => b.place_id === placeId), [compareList])
+  const clearCompare = useCallback(() => { setCompareList([]); setShowCompare(false) }, [])
 
-  const isInCompare = useCallback((placeId) => {
-    return compareList.some(b => b.place_id === placeId)
-  }, [compareList])
-
-  const clearCompare = useCallback(() => {
-    setCompareList([])
-    setShowCompare(false)
+  // Toast notifications
+  const [toasts, setToasts] = useState([])
+  const addToast = useCallback((message, type = 'info') => {
+    const id = Date.now()
+    setToasts(prev => [...prev, { id, message, type }])
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500)
   }, [])
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }, [])
+
+  // Delegated hooks
+  const lighthouse = useLighthouse()
+  const contact = useContactPipeline()
+  const saved = useSaved()
+  const searchHistory = useSearchHistory()
+  const userSettings = useUserSettings()
 
   return (
     <AppContext.Provider value={{
+      // Core business
       businesses, setBusinesses,
       selectedBusiness, setSelectedBusiness,
-      compareList, addToCompare, isInCompare, clearCompare,
-      lighthouseData, setLighthouseData,
-      loadingLighthouse, setLoadingLighthouse,
       isSearching, setIsSearching,
-      showCompare, setShowCompare,
-      mapCenter, setMapCenter,
-      mapZoom, setMapZoom,
+      isPaginating, setIsPaginating,
+      isAnalyzing, setIsAnalyzing,
       searchQuery, setSearchQuery,
       suggestedType, setSuggestedType,
       filterMode, setFilterMode,
       sortBy, setSortBy,
       sortOrder, setSortOrder,
-      savedBusinesses, toggleSave, isSaved,
-      showSaved, setShowSaved,
-      contactStatuses, cycleContactStatus, clearContactStatus, getContactStatus,
-      trackedBusinesses, setTrackedBusinesses, trackedCounts,
-      showInteresados, setShowInteresados,
-      isPaginating, setIsPaginating,
-      isAnalyzing, setIsAnalyzing,
-      showDashboard, setShowDashboard,
-      showSettings, setShowSettings,
-      searchHistory, addSearchEntry,
-      userSettings, setUserSettings,
-      toasts, addToast,
-      mapRef, placesServiceRef,
+
+      // Map
+      mapCenter, setMapCenter,
+      mapZoom, setMapZoom,
       mapClickLocation, setMapClickLocation,
       searchRadius, setSearchRadius,
+      mapRef, placesServiceRef,
+
+      // Panels
+      showCompare, setShowCompare,
+      showSaved, setShowSaved,
+      showInteresados, setShowInteresados,
+      showDashboard, setShowDashboard,
+      showSettings, setShowSettings,
+
+      // Compare
+      compareList, addToCompare, isInCompare, clearCompare,
+
+      // Lighthouse (from hook)
+      lighthouseData: lighthouse.lighthouseData,
+      setLighthouseData: lighthouse.setLighthouseData,
+      loadingLighthouse: lighthouse.loadingLighthouse,
+      setLoadingLighthouse: lighthouse.setLoadingLighthouse,
+      clearLighthouseCache: lighthouse.clearLighthouseCache,
+
+      // Contact pipeline (from hook)
+      contactStatuses: contact.contactStatuses,
+      cycleContactStatus: contact.cycleContactStatus,
+      clearContactStatus: contact.clearContactStatus,
+      getContactStatus: contact.getContactStatus,
+      trackedBusinesses: contact.trackedBusinesses,
+      setTrackedBusinesses: contact.setTrackedBusinesses,
+      trackedCounts: contact.trackedCounts,
+
+      // Saved (from hook)
+      savedBusinesses: saved.savedBusinesses,
+      toggleSave: saved.toggleSave,
+      isSaved: saved.isSaved,
+
+      // Search history (from hook)
+      searchHistory: searchHistory.searchHistory,
+      addSearchEntry: searchHistory.addSearchEntry,
+
+      // User settings (from hook)
+      userSettings: userSettings.userSettings,
+      setUserSettings: userSettings.setUserSettings,
+
+      // Toast
+      toasts, addToast, removeToast,
     }}>
       {children}
     </AppContext.Provider>
