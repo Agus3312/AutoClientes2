@@ -10,6 +10,7 @@ import PromptPanel from './components/PromptPanel'
 import ComparePanel from './components/ComparePanel'
 import SavedPanel from './components/SavedPanel'
 import InteresadosPanel from './components/InteresadosPanel'
+import PipelineView from './components/PipelineView'
 import DashboardPanel from './components/DashboardPanel'
 import SettingsPanel from './components/SettingsPanel'
 import WelcomeScreen from './components/WelcomeScreen'
@@ -88,7 +89,7 @@ function AppContent() {
 
       {showCompare && <ComparePanel />}
       <SavedPanel />
-      <InteresadosPanel />
+      <PipelineView />
       <DashboardPanel />
       <SettingsPanel />
       <Toast />

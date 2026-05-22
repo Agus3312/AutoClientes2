@@ -106,12 +106,22 @@ export function AppProvider({ children }) {
 
       // Contact pipeline (from hook)
       contactStatuses: contact.contactStatuses,
+      contactTimestamps: contact.contactTimestamps,
       cycleContactStatus: contact.cycleContactStatus,
       clearContactStatus: contact.clearContactStatus,
       getContactStatus: contact.getContactStatus,
       trackedBusinesses: contact.trackedBusinesses,
       setTrackedBusinesses: contact.setTrackedBusinesses,
       trackedCounts: contact.trackedCounts,
+      // Notes
+      getNotes: contact.getNotes,
+      setNotes: contact.setNotes,
+      // Reminders
+      getReminder: contact.getReminder,
+      setReminder: contact.setReminder,
+      completeReminder: contact.completeReminder,
+      removeReminder: contact.removeReminder,
+      upcomingReminders: contact.upcomingReminders,
 
       // Saved (from hook)
       savedBusinesses: saved.savedBusinesses,
