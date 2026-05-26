@@ -1,7 +1,7 @@
 import { useApp } from '../context/AppContext'
 import BusinessCard from './BusinessCard'
 import { TrendingUp, Search, Globe, WifiOff, ArrowUp, ArrowDown, Target, Download, Loader2 } from 'lucide-react'
-import { exportToCSV } from '../utils/csvExport'
+import { exportToSheet } from '../utils/csvExport'
 
 // Rubros con mayor oportunidad de venta de SaaS
 const HOT_TARGETS = [
@@ -99,9 +99,9 @@ export default function BusinessList() {
   const analyzedCount = Object.keys(lighthouseData).filter(id => businesses.some(b => b.place_id === id)).length
   const noWebPct = analyzedCount > 0 ? Math.round((noWebCount / analyzedCount) * 100) : 0
 
-  const handleExportCSV = () => {
-    exportToCSV(businesses, lighthouseData, contactStatuses)
-    addToast('CSV exportado', 'success')
+  const handleExportCSV = async () => {
+    await exportToSheet(businesses, lighthouseData, contactStatuses)
+    addToast('Excel exportado', 'success')
   }
 
   if (isSearching) {
@@ -176,7 +176,7 @@ export default function BusinessList() {
             <button
               onClick={handleExportCSV}
               className="btn-ghost text-xs"
-              title="Exportar CSV"
+              title="Exportar Excel"
             >
               <Download className="w-3.5 h-3.5" />
             </button>

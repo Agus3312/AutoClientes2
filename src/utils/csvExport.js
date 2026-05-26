@@ -4,7 +4,9 @@ const STATUS_LABELS = {
   interested: 'Interesado',
 }
 
-export function exportToCSV(businesses, lighthouseData = {}, contactStatuses = {}) {
+export async function exportToSheet(businesses, lighthouseData = {}, contactStatuses = {}) {
+  const XLSX = await import('xlsx')
+
   const headers = [
     'Nombre', 'Direccion', 'Rating', 'Resenas', 'Telefono', 'Email',
     'Instagram', 'Facebook', 'Sitio Web', 'Tiene Web',
@@ -20,7 +22,7 @@ export function exportToCSV(businesses, lighthouseData = {}, contactStatuses = {
 
     return [
       b.name || '',
-      (b.vicinity || '').replace(/,/g, ' -'),
+      b.vicinity || '',
       b.rating || '',
       b.user_ratings_total || 0,
       b.phone || '',
@@ -38,16 +40,34 @@ export function exportToCSV(businesses, lighthouseData = {}, contactStatuses = {
     ]
   })
 
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-  ].join('\n')
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
 
-  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `AutoClientes_${new Date().toISOString().slice(0, 10)}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
+  // Column widths for readability
+  ws['!cols'] = [
+    { wch: 30 }, // Nombre
+    { wch: 35 }, // Direccion
+    { wch: 8 },  // Rating
+    { wch: 8 },  // Resenas
+    { wch: 18 }, // Telefono
+    { wch: 25 }, // Email
+    { wch: 30 }, // Instagram
+    { wch: 30 }, // Facebook
+    { wch: 35 }, // Sitio Web
+    { wch: 10 }, // Tiene Web
+    { wch: 12 }, // Performance
+    { wch: 8 },  // SEO
+    { wch: 14 }, // Accesibilidad
+    { wch: 16 }, // Buenas Practicas
+    { wch: 16 }, // Estado Contacto
+    { wch: 50 }, // Google Maps
+  ]
+
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Negocios')
+
+  const dateStr = new Date().toISOString().slice(0, 10)
+  XLSX.writeFile(wb, `AutoClientes_${dateStr}.xlsx`)
 }
+
+// Keep backward compat alias
+export const exportToCSV = exportToSheet
