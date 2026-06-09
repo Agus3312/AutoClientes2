@@ -35,7 +35,6 @@ export default function SearchBar() {
     isSearching, isPaginating, isAnalyzing,
     suggestedType, setSuggestedType,
     searchHistory,
-    mapClickLocation, setMapClickLocation,
     searchRadius, setSearchRadius,
     setBusinesses, setSelectedBusiness,
   } = useApp()
@@ -60,13 +59,6 @@ export default function SearchBar() {
       setSuggestedType('')
     }
   }, [suggestedType])
-
-  useEffect(() => {
-    if (mapClickLocation) {
-      setLocation(mapClickLocation.label)
-      locationCoordsRef.current = { lat: mapClickLocation.lat, lng: mapClickLocation.lng }
-    }
-  }, [mapClickLocation])
 
   useEffect(() => {
     setSearchRadius(radius)
@@ -112,7 +104,6 @@ export default function SearchBar() {
     setLocation('')
     setBusinesses([])
     setSelectedBusiness(null)
-    setMapClickLocation(null)
     locationCoordsRef.current = null
   }
 

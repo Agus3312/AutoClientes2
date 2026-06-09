@@ -7,7 +7,7 @@ import { buildWhatsAppUrl } from '../utils/phoneUtils'
 function BusinessSummary({ business, lighthouse }) {
   const hasScores = lighthouse && !lighthouse.error && !lighthouse.noWebsite
   return (
-    <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-800">
+    <div className="px-4 py-3 bg-white dark:bg-surface-950 border-b border-slate-100 dark:border-slate-800">
       <h3 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{business.name}</h3>
       <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500 dark:text-gray-400">
         {business.rating && (
@@ -82,9 +82,9 @@ export default function PromptPanel() {
   const hasPhone = business?.phone
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-gray-950">
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-surface-950">
       {/* Header */}
-      <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-800 flex items-center gap-2.5 flex-shrink-0">
+      <div className="px-4 py-3 bg-white dark:bg-surface-950 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5 flex-shrink-0">
         <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
           <MessageSquare className="w-4 h-4 text-white" />
         </div>
@@ -107,7 +107,7 @@ export default function PromptPanel() {
       {/* Content */}
       {!business ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-16 h-16 bg-slate-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-slate-100 dark:bg-surface-900 rounded-2xl flex items-center justify-center mb-4">
             <MessageSquare className="w-8 h-8 text-slate-300 dark:text-gray-600" />
           </div>
           <p className="text-sm font-medium text-slate-600 dark:text-gray-400">Selecciona un negocio</p>
@@ -125,7 +125,7 @@ export default function PromptPanel() {
             <textarea
               value={message}
               onChange={e => setMessage(e.target.value)}
-              className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-xl p-3 text-sm text-slate-700 dark:text-gray-300 leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+              className="w-full bg-white dark:bg-surface-950 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-700 dark:text-gray-300 leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
               rows={8}
               placeholder="Escribe tu mensaje..."
             />
@@ -151,7 +151,7 @@ export default function PromptPanel() {
                   twitter: 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 border-sky-200 dark:border-sky-800',
                   linkedin: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800',
                   youtube: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 border-red-200 dark:border-red-800',
-                  tiktok: 'bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-700 border-slate-200 dark:border-gray-700',
+                  tiktok: 'bg-slate-100 dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-700 border-slate-200 dark:border-slate-700',
                 }
                 const dmUrl = s.key === 'instagram' ? `https://ig.me/m/${s.handle}`
                   : s.key === 'facebook' ? `https://m.me/${s.handle}`
@@ -175,7 +175,7 @@ export default function PromptPanel() {
                 className={`flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl transition-colors ${
                   hasPhone
                     ? 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-gray-800 text-slate-400 cursor-not-allowed'
+                    : 'bg-slate-100 dark:bg-surface-900 text-slate-400 cursor-not-allowed'
                 }`}
               >
                 <Send className="w-3.5 h-3.5" />
@@ -185,7 +185,7 @@ export default function PromptPanel() {
               {/* Copy */}
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? 'Copiado!' : 'Copiar'}

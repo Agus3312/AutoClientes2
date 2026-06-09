@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <div className="fixed inset-0 z-[200] bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[200] bg-gradient-to-br from-brand-600 via-brand-500 to-purple-700 flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center animate-fade-in">
         {/* Logo */}
         <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -26,9 +26,9 @@ export default function WelcomeScreen() {
         </div>
 
         <h1 className="text-3xl font-bold text-white mb-2">
-          Auto<span className="text-indigo-200">Clientes</span>
+          Auto<span className="text-brand-200">Clientes</span>
         </h1>
-        <p className="text-indigo-200 text-sm mb-10">
+        <p className="text-brand-200 text-sm mb-10">
           Encontra negocios que necesitan tu servicio web
         </p>
 
@@ -41,7 +41,7 @@ export default function WelcomeScreen() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-white">{step.title}</p>
-                <p className="text-xs text-indigo-200 mt-0.5">{step.desc}</p>
+                <p className="text-xs text-brand-200 mt-0.5">{step.desc}</p>
               </div>
               <span className="text-white/30 font-bold text-lg mt-1">{i + 1}</span>
             </div>
@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
         {/* CTA */}
         <button
           onClick={handleStart}
-          className="bg-white text-indigo-700 font-bold text-sm px-8 py-3 rounded-xl shadow-lg hover:bg-indigo-50 transition-colors flex items-center gap-2 mx-auto"
+          className="bg-white text-brand-700 font-bold text-sm px-8 py-3 rounded-xl shadow-lg hover:bg-brand-50 transition-colors flex items-center gap-2 mx-auto"
         >
           Empezar
           <ArrowRight className="w-4 h-4" />

@@ -4,12 +4,10 @@ import { ThemeProvider } from './context/ThemeContext'
 import { useApp } from './context/AppContext'
 import Navbar from './components/Navbar'
 import SearchBar from './components/SearchBar'
-import MapView from './components/MapView'
 import BusinessList from './components/BusinessList'
 import PromptPanel from './components/PromptPanel'
 import ComparePanel from './components/ComparePanel'
 import SavedPanel from './components/SavedPanel'
-import InteresadosPanel from './components/InteresadosPanel'
 import PipelineView from './components/PipelineView'
 import DashboardPanel from './components/DashboardPanel'
 import SettingsPanel from './components/SettingsPanel'
@@ -28,33 +26,16 @@ function AppContent() {
     libraries: GOOGLE_MAPS_LIBRARIES,
   })
 
-  if (loadError) {
-    return (
-      <div className="min-h-screen bg-surface-50 dark:bg-surface-950 flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="card p-8 max-w-md text-center shadow-modal">
-            <div className="w-14 h-14 bg-red-50 dark:bg-red-950/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-7 h-7 text-red-500" />
-            </div>
-            <h2 className="font-display font-bold text-xl text-slate-900 dark:text-white mb-2">Error al cargar Google Maps</h2>
-            <p className="text-slate-500 dark:text-gray-400 text-sm mb-4 leading-relaxed">
-              Verifica que la clave API este en el <code className="bg-slate-100 dark:bg-surface-800 px-1.5 py-0.5 rounded text-xs font-mono">.env</code> y que las APIs <strong>Maps JavaScript</strong> y <strong>Places</strong> esten habilitadas en Google Cloud Console.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const showMapWarning = !!loadError
 
-  if (!isLoaded) {
+  if (!isLoaded && !loadError) {
     return (
       <div className="min-h-screen bg-surface-50 dark:bg-surface-950 flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-[3px] border-brand-200 dark:border-brand-800 border-t-brand-600 dark:border-t-brand-400 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-500 dark:text-gray-400 text-sm">Cargando Google Maps...</p>
+            <p className="text-slate-500 dark:text-gray-400 text-sm">Cargando...</p>
           </div>
         </div>
       </div>
@@ -66,20 +47,29 @@ function AppContent() {
       <Navbar />
       <SearchBar />
 
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-        {/* Left: Map + List */}
-        <div className="flex flex-col lg:w-[58%] h-full overflow-hidden border-r border-slate-200/60 dark:border-slate-800/60">
-          <ErrorBoundary>
-            <MapView />
-          </ErrorBoundary>
+      {/* Google Maps warning banner — app still works via Places API */}
+      {showMapWarning && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center gap-2 text-sm">
+          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <span className="text-amber-800 dark:text-amber-200 text-xs">
+            Google Maps no se cargó. La búsqueda de lugares aún funciona, pero no se mostrará el mapa.
+          </span>
+        </div>
+      )}
+
+      <main className="flex-1 flex overflow-hidden min-h-0">
+        {/* Left: Business list — full width on mobile, 55% on desktop */}
+        <div className="w-full lg:w-[55%] overflow-hidden border-r border-slate-200/60 dark:border-slate-800/60">
           <ErrorBoundary>
             <BusinessList />
           </ErrorBoundary>
         </div>
 
-        {/* Right: Message panel — hidden on mobile unless business selected */}
-        <div className={`lg:w-[42%] lg:h-full overflow-hidden flex-shrink-0 ${
-          selectedBusiness ? 'fixed inset-0 z-40 bg-white dark:bg-surface-950 lg:relative lg:inset-auto lg:bg-transparent' : 'hidden lg:block'
+        {/* Right: Detail panel — hidden on mobile unless business selected */}
+        <div className={`lg:w-[45%] lg:h-full overflow-hidden flex-shrink-0 ${
+          selectedBusiness
+            ? 'fixed inset-0 z-40 bg-white dark:bg-surface-950 lg:relative lg:inset-auto lg:bg-transparent'
+            : 'hidden lg:block'
         }`}>
           <ErrorBoundary>
             <PromptPanel />
@@ -88,10 +78,10 @@ function AppContent() {
       </main>
 
       {showCompare && <ComparePanel />}
-      <SavedPanel />
       <PipelineView />
       <DashboardPanel />
       <SettingsPanel />
+      <SavedPanel />
       <Toast />
       <WelcomeScreen />
     </div>

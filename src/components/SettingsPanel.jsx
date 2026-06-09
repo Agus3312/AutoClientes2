@@ -39,11 +39,11 @@ export default function SettingsPanel() {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
 
-      <div className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-gray-800 overflow-hidden animate-scale-in">
+      <div className="relative w-full max-w-lg bg-white dark:bg-surface-950 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-scale-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-gray-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-indigo-500" />
+            <Settings className="w-4 h-4 text-brand-500" />
             <h2 className="font-semibold text-slate-800 dark:text-white">Configuracion</h2>
           </div>
           <button onClick={() => setShowSettings(false)} className="btn-ghost">
@@ -52,7 +52,7 @@ export default function SettingsPanel() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-100 dark:border-gray-800 px-4">
+        <div className="flex border-b border-slate-100 dark:border-slate-800 px-4">
           {[
             { id: 'message', label: 'Mensaje', icon: MessageSquare },
             { id: 'profile', label: 'Perfil', icon: User },
@@ -62,7 +62,7 @@ export default function SettingsPanel() {
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2.5 border-b-2 transition-colors ${
                 tab === t.id
-                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-brand-600 text-brand-600 dark:text-brand-400'
                   : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700'
               }`}
             >
@@ -86,7 +86,7 @@ export default function SettingsPanel() {
                   value={customTemplate}
                   onChange={e => updateSetting('customTemplate', e.target.value)}
                   placeholder="Ej: Hola! Vi {nombre} en Google Maps y me gustaria ofrecerles..."
-                  className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl p-3 text-sm text-slate-700 dark:text-gray-300 leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  className="w-full bg-slate-50 dark:bg-surface-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-700 dark:text-gray-300 leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-brand-500/30"
                   rows={5}
                 />
                 {customTemplate && (
@@ -96,19 +96,19 @@ export default function SettingsPanel() {
                 )}
               </div>
 
-              <div className="bg-slate-50 dark:bg-gray-800 rounded-xl p-3">
+              <div className="bg-slate-50 dark:bg-surface-900 rounded-xl p-3">
                 <p className="text-[11px] font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">Placeholders disponibles</p>
                 <div className="space-y-1">
                   {PLACEHOLDERS_HELP.map(p => (
                     <div key={p.tag} className="flex items-center justify-between text-xs">
-                      <code className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded font-mono text-[11px]">{p.tag}</code>
+                      <code className="text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 px-1.5 py-0.5 rounded font-mono text-[11px]">{p.tag}</code>
                       <span className="text-slate-500">{p.desc}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 dark:border-gray-800">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button onClick={clearLighthouseCacheHandler} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-500 transition-colors">
                   <Trash2 className="w-3 h-3" /> Borrar cache de Lighthouse
                 </button>

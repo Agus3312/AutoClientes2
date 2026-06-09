@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import ScoreGauge from './ScoreGauge'
 
-const COLORS = ['#1e40af', '#ea580c', '#16a34a']
+const COLORS = ['#6340f6', '#ea580c', '#16a34a']
 const METRICS = [
   { key: 'performance', label: 'Performance' },
   { key: 'accessibility', label: 'Accesibilidad' },
@@ -52,13 +52,13 @@ export default function ComparePanel() {
       onClick={() => setShowCompare(false)}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-auto shadow-2xl"
+        className="bg-white dark:bg-surface-900 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white dark:bg-surface-900 border-b border-slate-100 dark:border-slate-700 px-6 py-4 flex items-center justify-between z-10">
           <div>
-            <h2 className="font-display font-bold text-gray-900 dark:text-white text-xl">
+            <h2 className="font-display font-bold text-slate-900 dark:text-white text-xl">
               Comparación de Negocios
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -67,7 +67,7 @@ export default function ComparePanel() {
           </div>
           <button
             onClick={() => setShowCompare(false)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -84,7 +84,7 @@ export default function ComparePanel() {
                 >
                   {i + 1}
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm leading-tight">
                   {b.name}
                 </h3>
                 {b.rating && (
@@ -139,7 +139,7 @@ export default function ComparePanel() {
           <div className="card overflow-hidden mb-4">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-700/50">
+                <tr className="bg-slate-50 dark:bg-surface-800/50">
                   <th className="text-left px-4 py-3 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase tracking-wide">
                     Métrica
                   </th>
@@ -160,7 +160,7 @@ export default function ComparePanel() {
                   return (
                     <tr
                       key={key}
-                      className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                      className="border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-surface-800/30 transition-colors"
                     >
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">
                         {label}
@@ -189,7 +189,7 @@ export default function ComparePanel() {
                   )
                 })}
 
-                <tr className="border-t border-gray-100 dark:border-gray-700">
+                <tr className="border-t border-slate-100 dark:border-slate-700">
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">
                     Calificación
                   </td>

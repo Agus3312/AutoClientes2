@@ -11,9 +11,9 @@ export default function SavedPanel() {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSaved(false)} />
 
-      <div className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-gray-800 overflow-hidden animate-scale-in">
+      <div className="relative w-full max-w-lg bg-white dark:bg-surface-950 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-scale-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-gray-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <Bookmark className="w-4 h-4 text-amber-500 fill-amber-500" />
             <h2 className="font-semibold text-slate-800 dark:text-white">Negocios guardados</h2>
@@ -36,7 +36,7 @@ export default function SavedPanel() {
             </div>
           ) : (
             savedBusinesses.map(b => (
-              <div key={b.place_id} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-gray-800 rounded-xl">
+              <div key={b.place_id} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-surface-900 rounded-xl">
                 {b.photos?.[0]?.photo_reference ? (
                   <img
                     src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=60&photo_reference=${b.photos[0].photo_reference}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`}
@@ -44,8 +44,8 @@ export default function SavedPanel() {
                     className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Bookmark className="w-4 h-4 text-indigo-400" />
+                  <div className="w-10 h-10 bg-brand-50 dark:bg-brand-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Bookmark className="w-4 h-4 text-brand-400" />
                   </div>
                 )}
 

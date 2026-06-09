@@ -137,16 +137,6 @@ function BusinessCard({ business, index }) {
             <h3 className="font-semibold text-slate-900 dark:text-white text-sm leading-snug line-clamp-1">
               {business.name}
             </h3>
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              title="Ver en Google Maps"
-              className="flex-shrink-0 text-slate-300 hover:text-indigo-500 dark:text-gray-600 dark:hover:text-indigo-400 transition-colors mt-0.5"
-            >
-              <MapPin className="w-3.5 h-3.5" />
-            </a>
           </div>
 
           {business.rating && (
@@ -160,6 +150,16 @@ function BusinessCard({ business, index }) {
             <div className="flex items-center gap-1 mt-1">
               <MapPin className="w-3 h-3 text-slate-300 dark:text-gray-600 flex-shrink-0" />
               <span className="text-[11px] text-slate-400 dark:text-gray-500 line-clamp-1">{business.vicinity}</span>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="text-[11px] text-brand-500 hover:text-brand-700 flex items-center gap-0.5 ml-1 flex-shrink-0"
+              >
+                <MapPin className="w-3 h-3" />
+                Ver mapa
+              </a>
             </div>
           )}
 
