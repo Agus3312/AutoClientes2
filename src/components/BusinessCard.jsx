@@ -161,8 +161,8 @@ function BusinessCard({ business, index }) {
             {/* Score pills */}
             {isAnalyzing && (
               <div className="flex items-center gap-1.5 mt-2">
-                <Loader2 className="w-3 h-3 animate-spin text-brand-400" />
-                <span className="text-[11px] text-slate-400">Analizando web…</span>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
+                <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400">Analizando web…</span>
               </div>
             )}
             {!isAnalyzing && scores && !scores.error && !scores.noWebsite && (
@@ -226,11 +226,16 @@ function BusinessCard({ business, index }) {
           {business.phone && (
             <button
               onClick={handleWhatsApp}
-              title="Contactar por WhatsApp"
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all active:scale-[0.97]"
+              disabled={isAnalyzing}
+              title={isAnalyzing ? 'Esperando análisis…' : 'Contactar por WhatsApp'}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all active:scale-[0.97] ${
+                isAnalyzing
+                  ? 'border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-wait'
+                  : 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-white'
+              }`}
             >
-              <Phone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">WhatsApp</span>
+              {isAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Phone className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{isAnalyzing ? 'Analizando…' : 'WhatsApp'}</span>
             </button>
           )}
 
