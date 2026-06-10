@@ -45,6 +45,7 @@ export default function SearchBar() {
     searchHistory,
     searchRadius, setSearchRadius,
     setBusinesses, setSelectedBusiness,
+    placesServiceRef,
   } = useApp()
 
   const { search, cancelAnalysis } = useBusinessSearch()
@@ -71,6 +72,13 @@ export default function SearchBar() {
   useEffect(() => {
     setSearchRadius(radius)
   }, [radius])
+
+  // Initialize PlacesService once Google Maps is loaded
+  useEffect(() => {
+    if (!isLoaded || placesServiceRef.current) return
+    const div = document.createElement('div')
+    placesServiceRef.current = new window.google.maps.places.PlacesService(div)
+  }, [isLoaded])
 
   useEffect(() => {
     if (!isLoaded || !locationInputRef.current) return
