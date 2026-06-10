@@ -20,7 +20,7 @@ function AppContent() {
 
       <main className="flex-1 flex overflow-hidden min-h-0">
         {/* Left: Business list — full width on mobile, 55% on desktop */}
-        <div className="w-full lg:w-[55%] overflow-hidden border-r border-slate-200/60 dark:border-slate-800/60">
+        <div className="w-full lg:w-[55%] flex flex-col overflow-hidden border-r border-slate-200/60 dark:border-slate-800/60">
           <ErrorBoundary>
             <BusinessList />
           </ErrorBoundary>

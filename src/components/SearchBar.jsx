@@ -117,9 +117,13 @@ export default function SearchBar() {
 
   const handleClear = () => {
     cancelAnalysis()
+    setIsSearching(false)
+    setIsPaginating(false)
+    setIsAnalyzing(false)
     setLocation('')
     setBusinesses([])
     setSelectedBusiness(null)
+    setLighthouseData({})
     locationCoordsRef.current = null
   }
 
