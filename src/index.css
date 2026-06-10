@@ -5,7 +5,7 @@
 @layer base {
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { @apply font-sans antialiased text-slate-700 dark:text-gray-200; background: theme('colors.surface.50'); }
+  body { @apply font-sans antialiased text-slate-700 dark:text-slate-300; background: theme('colors.surface.50'); }
   .dark body { background: theme('colors.surface.950'); }
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -20,10 +20,10 @@
     @apply bg-brand-600 hover:bg-brand-700 active:scale-[0.97] text-white font-semibold py-2.5 px-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-150 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
   }
   .btn-secondary {
-    @apply bg-white dark:bg-surface-850 hover:bg-slate-50 dark:hover:bg-surface-800 text-slate-700 dark:text-gray-200 font-medium py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all duration-150 flex items-center gap-2;
+    @apply bg-white dark:bg-surface-850 hover:bg-slate-50 dark:hover:bg-surface-800 text-slate-700 dark:text-slate-200 font-medium py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all duration-150 flex items-center gap-2;
   }
   .btn-ghost {
-    @apply text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/50 p-2 rounded-lg transition-all duration-150 flex items-center justify-center;
+    @apply text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/50 p-2 rounded-lg transition-all duration-150 flex items-center justify-center;
   }
 
   /* Cards */
@@ -36,14 +36,14 @@
 
   /* Inputs */
   .input-field {
-    @apply w-full px-4 py-2.5 bg-white dark:bg-surface-850 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-gray-100 placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 transition-all duration-200 text-sm;
+    @apply w-full px-4 py-2.5 bg-white dark:bg-surface-850 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 transition-all duration-200 text-sm;
   }
 
   /* Badges */
-  .badge-green  { @apply text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 text-[11px] font-bold px-2 py-0.5 rounded-full; }
-  .badge-yellow { @apply text-amber-700 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 text-[11px] font-bold px-2 py-0.5 rounded-full; }
-  .badge-red    { @apply text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 text-[11px] font-bold px-2 py-0.5 rounded-full; }
-  .badge-brand  { @apply text-brand-700 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-300 text-[11px] font-bold px-2 py-0.5 rounded-full; }
+  .badge-green  { @apply text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium px-1.5 py-0.5 rounded-md; }
+  .badge-yellow { @apply text-amber-400 bg-amber-500/10 border border-amber-500/20 text-[10px] font-medium px-1.5 py-0.5 rounded-md; }
+  .badge-red    { @apply text-red-400 bg-red-500/10 border border-red-500/20 text-[10px] font-medium px-1.5 py-0.5 rounded-md; }
+  .badge-brand  { @apply text-brand-400 bg-brand-500/10 border border-brand-500/20 text-[10px] font-medium px-1.5 py-0.5 rounded-md; }
 
   /* Shimmer skeleton */
   .skeleton {

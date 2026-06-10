@@ -12,10 +12,10 @@ function Stars({ rating }) {
     <div className="flex items-center gap-1">
       <div className="flex gap-0.5">
         {[1,2,3,4,5].map(i => (
-          <Star key={i} className={`w-3.5 h-3.5 ${i <= full ? 'text-amber-400 fill-amber-400' : 'text-slate-200 dark:text-gray-700 fill-slate-200 dark:fill-gray-700'}`} />
+          <Star key={i} className={`w-3.5 h-3.5 ${i <= full ? 'text-amber-400 fill-amber-400' : 'text-slate-200 dark:text-slate-700 fill-slate-200 dark:fill-slate-700'}`} />
         ))}
       </div>
-      <span className="text-xs font-semibold text-slate-700 dark:text-gray-200">{rating}</span>
+      <span className="text-xs font-semibold text-slate-700 dark:text-white">{rating}</span>
     </div>
   )
 }
@@ -102,34 +102,29 @@ function BusinessCard({ business, index }) {
     <div
       onClick={() => setSelectedBusiness(isSelected ? null : business)}
       className={`
-        relative cursor-pointer rounded-2xl border transition-all duration-200 overflow-hidden
+        relative cursor-pointer rounded-2xl border border-slate-100 dark:border-slate-800/60 border-l-4 transition-all duration-200 overflow-hidden
         ${isSelected
-          ? 'bg-brand-50/80 dark:bg-brand-950/30 border-brand-200 dark:border-brand-800 shadow-card-hover'
-          : 'card hover:shadow-card-hover'}
+          ? 'bg-brand-500/5 dark:bg-brand-500/10 border-l-brand-500 shadow-card-hover'
+          : 'bg-white dark:bg-surface-900 hover:shadow-card-hover'}
       `}
+      style={isSelected ? {} : { borderLeftColor: COLORS[index % COLORS.length] }}
     >
-      {/* Left color bar */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-        style={{ backgroundColor: isSelected ? '#6340f6' : COLORS[index % COLORS.length] }}
-      />
-
       <div className="pl-4 pr-3 py-3">
         {/* Top section: Photo + Info */}
         <div className="flex items-start gap-3">
           {/* Photo or number badge */}
           {photoUrl && !photoError ? (
-            <div className="relative w-[60px] h-[60px] rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-gray-800">
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-surface-800">
               <img src={photoUrl} alt={business.name} className="w-full h-full object-cover" onError={() => setPhotoError(true)} />
               <span
-                className="absolute bottom-0 right-0 w-5 h-5 flex items-center justify-center text-white text-[10px] font-bold rounded-tl-md"
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                className="absolute -bottom-0.5 -right-0.5 w-4 h-4 flex items-center justify-center text-white text-[9px] font-mono rounded-tl-sm"
+                style={{ backgroundColor: `${COLORS[index % COLORS.length]}B0` }}
               >{index + 1}</span>
             </div>
           ) : (
             <div
-              className="w-[60px] h-[60px] rounded-xl flex items-center justify-center text-white text-lg font-bold flex-shrink-0"
-              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono flex-shrink-0"
+              style={{ backgroundColor: `${COLORS[index % COLORS.length]}12`, color: COLORS[index % COLORS.length] }}
             >{index + 1}</div>
           )}
 
@@ -142,14 +137,14 @@ function BusinessCard({ business, index }) {
             {business.rating && (
               <div className="mt-1 flex items-center gap-2">
                 <Stars rating={business.rating} />
-                <span className="text-[11px] text-slate-400">({business.user_ratings_total?.toLocaleString() || 0})</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">({business.user_ratings_total?.toLocaleString() || 0})</span>
               </div>
             )}
 
             {business.vicinity && (
               <div className="flex items-center gap-1 mt-1">
-                <MapPin className="w-3 h-3 text-slate-300 dark:text-gray-600 flex-shrink-0" />
-                <span className="text-[11px] text-slate-400 dark:text-gray-500 line-clamp-1">{business.vicinity}</span>
+                <MapPin className="w-3 h-3 text-slate-300 dark:text-slate-600 flex-shrink-0" />
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">{business.vicinity}</span>
                 <a
                   href={mapsUrl}
                   target="_blank"
@@ -181,24 +176,24 @@ function BusinessCard({ business, index }) {
             {!isAnalyzing && scores?.detectedSaas?.length > 0 && (
               <div className="flex gap-1 mt-1.5 flex-wrap">
                 {scores.detectedSaas.map(s => (
-                  <span key={s.name} className="inline-flex items-center gap-1 text-[10px] font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 px-1.5 py-0.5 rounded-full">
+                  <span key={s.name} className="inline-flex items-center gap-1 text-[10px] font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded-md">
                     <Zap className="w-2.5 h-2.5" />{s.name}
                   </span>
                 ))}
               </div>
             )}
             {!isAnalyzing && scores && !scores.error && !scores.noWebsite && scores.detectedSaas?.length === 0 && (
-              <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+              <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md">
                 <Zap className="w-2.5 h-2.5" /> Sin SaaS detectado — oportunidad
               </span>
             )}
             {!isAnalyzing && scores?.noWebsite && (
-              <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full font-semibold">
-                <Zap className="w-3 h-3" /> Sin web — alta oportunidad SaaS
+              <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md">
+                <Zap className="w-2.5 h-2.5" /> Sin web — alta oportunidad SaaS
               </span>
             )}
             {!isAnalyzing && scores?.error && (
-              <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full cursor-help" title={scores.error}>
+              <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded-md cursor-help" title={scores.error}>
                 Error al analizar
               </span>
             )}
@@ -224,26 +219,26 @@ function BusinessCard({ business, index }) {
 
         {/* Bottom action row */}
         <div
-          className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-1.5 flex-wrap"
+          className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-0.5 flex-wrap"
           onClick={e => e.stopPropagation()}
         >
-          {/* WhatsApp CTA — prominent green button */}
+          {/* WhatsApp CTA — subtle outline button */}
           {business.phone && (
             <button
               onClick={handleWhatsApp}
               title="Contactar por WhatsApp"
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-sm transition-colors active:scale-[0.97]"
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all active:scale-[0.97]"
             >
               <Phone className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">WhatsApp</span>
             </button>
           )}
 
-          {/* Secondary actions — ghost buttons */}
+          {/* Secondary actions — subtle icon buttons */}
           <button
             onClick={() => addToCompare(business)}
             title={inCompare ? 'Quitar de comparar' : 'Comparar'}
-            className={`btn-ghost p-1.5 ${inCompare ? 'text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30' : ''}`}
+            className={`p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-800 transition-colors ${inCompare ? 'text-brand-500 dark:text-brand-400 bg-brand-500/10 dark:bg-brand-500/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
           >
             {inCompare ? <Check className="w-3.5 h-3.5" /> : <GitCompare className="w-3.5 h-3.5" />}
           </button>
@@ -251,7 +246,7 @@ function BusinessCard({ business, index }) {
           <button
             onClick={e => { e.stopPropagation(); toggleSave(business) }}
             title={isSaved(business.place_id) ? 'Quitar de guardados' : 'Guardar negocio'}
-            className={`btn-ghost p-1.5 ${isSaved(business.place_id) ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' : ''}`}
+            className={`p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-800 transition-colors ${isSaved(business.place_id) ? 'text-amber-500 bg-amber-500/10 dark:bg-amber-500/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
           >
             <Bookmark className={`w-3.5 h-3.5 ${isSaved(business.place_id) ? 'fill-amber-500' : ''}`} />
           </button>
@@ -259,12 +254,12 @@ function BusinessCard({ business, index }) {
           <button
             onClick={e => { e.stopPropagation(); cycleContactStatus(business) }}
             title={STATUS_LABELS[getContactStatus(business.place_id)]}
-            className={`btn-ghost p-1.5 ${
+            className={`p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-800 transition-colors ${
               getContactStatus(business.place_id) === 'interested'
-                ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'text-blue-500 bg-blue-500/10 dark:bg-blue-500/10'
                 : getContactStatus(business.place_id)
-                  ? 'text-slate-400 bg-slate-50 dark:bg-gray-800'
-                  : ''
+                  ? 'text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-surface-800'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
             }`}
           >
             <ContactTicks status={getContactStatus(business.place_id)} />
@@ -275,7 +270,7 @@ function BusinessCard({ business, index }) {
               onClick={fetchWebsite}
               disabled={websiteLoading}
               title="Obtener web"
-              className="btn-ghost p-1.5"
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-800 transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-40"
             >
               {websiteLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Globe className="w-3.5 h-3.5" />}
             </button>
@@ -286,7 +281,7 @@ function BusinessCard({ business, index }) {
               onClick={handleExport}
               disabled={isExporting}
               title="Exportar PDF"
-              className="btn-ghost p-1.5"
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-800 transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-40"
             >
               {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             </button>

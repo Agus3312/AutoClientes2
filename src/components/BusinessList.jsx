@@ -121,7 +121,7 @@ export default function BusinessList() {
             <Target className="w-4 h-4 text-indigo-500" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-700 dark:text-gray-200">Rubros con mayor oportunidad de SaaS</p>
+            <p className="text-xs font-bold text-slate-700 dark:text-white">Rubros con mayor oportunidad de SaaS</p>
             <p className="text-[11px] text-slate-400">Clickea uno para pre-llenar la busqueda</p>
           </div>
         </div>
@@ -132,16 +132,16 @@ export default function BusinessList() {
             <button
               key={t.label}
               onClick={() => setSuggestedType(t.label)}
-              className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all group"
+              className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl bg-white dark:bg-surface-900 border border-slate-100 dark:border-slate-800/60 hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all group"
             >
               <span className="text-base">{t.icon}</span>
-              <span className="flex-1 text-sm font-medium text-slate-700 dark:text-gray-200 group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
+              <span className="flex-1 text-sm font-medium text-slate-700 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
                 {t.label}
               </span>
-              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md">
                 {t.reason}
               </span>
-              <span className="text-[11px] font-bold text-slate-300 dark:text-gray-600 group-hover:text-indigo-400">
+              <span className="text-[11px] font-bold text-slate-300 dark:text-slate-600 group-hover:text-indigo-400">
                 #{i + 1}
               </span>
             </button>
@@ -158,7 +158,7 @@ export default function BusinessList() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-3.5 h-3.5 text-brand-500" />
-            <span className="text-xs font-semibold text-slate-600 dark:text-gray-300">
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
               {sorted.length} / {businesses.length} negocios
             </span>
             {isPaginating && (
@@ -185,18 +185,20 @@ export default function BusinessList() {
 
         {/* Business Intelligence Bar */}
         {analyzedCount > 0 && (
-          <div className="mb-2 p-2.5 bg-gradient-to-r from-brand-50 to-purple-50 dark:from-brand-950/30 dark:to-purple-950/30 rounded-xl border border-brand-100 dark:border-brand-900/40">
+          <div className="mb-2 p-2.5 bg-white dark:bg-surface-900 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-brand-700 dark:text-brand-300">
-                {noWebCount} de {analyzedCount} sin web ({noWebPct}%)
+              <span className="font-semibold text-brand-600 dark:text-brand-400">
+                <span className="text-slate-800 dark:text-white text-sm">{noWebCount}</span>
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">/{analyzedCount} sin web</span>
+                <span className="ml-1 text-slate-800 dark:text-white font-semibold text-sm">({noWebPct}%)</span>
               </span>
-              <span className="text-slate-500 dark:text-gray-400">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 {withWebCount} con web · {withPhoneCount} con tel
               </span>
             </div>
-            <div className="mt-1.5 h-2 bg-white dark:bg-gray-800 rounded-full overflow-hidden flex">
-              <div style={{width: `${noWebPct}%`}} className="bg-red-400 transition-all duration-500" />
-              <div style={{width: `${100-noWebPct}%`}} className="bg-green-400 transition-all duration-500" />
+            <div className="mt-1.5 h-1.5 bg-slate-100 dark:bg-surface-800 rounded-full overflow-hidden flex">
+              <div style={{width: `${noWebPct}%`}} className="bg-brand-500 transition-all duration-500" />
+              <div style={{width: `${100-noWebPct}%`}} className="bg-emerald-500/60 transition-all duration-500" />
             </div>
           </div>
         )}
@@ -213,8 +215,8 @@ export default function BusinessList() {
               onClick={() => setFilterMode(f.key)}
               className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                 filterMode === f.key
-                  ? 'bg-brand-600 text-white border-brand-600'
-                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700'
+                  ? 'bg-brand-500/10 text-brand-500 border-brand-500/20'
+                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700'
               }`}
             >
               {f.icon}{f.label}
@@ -228,8 +230,8 @@ export default function BusinessList() {
               onClick={() => toggleSort(opt.value)}
               className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                 sortBy === opt.value
-                  ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700'
+                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700'
               }`}
             >
               {opt.label}
@@ -248,8 +250,8 @@ export default function BusinessList() {
               onClick={() => toggleSort(opt.value)}
               className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                 sortBy === opt.value
-                  ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700'
+                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                  : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700'
               }`}
             >
               {opt.label}
