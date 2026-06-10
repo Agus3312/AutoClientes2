@@ -105,8 +105,6 @@ export default function SearchBar() {
       location,
       coords: locationCoordsRef.current,
       radius,
-      isSearching,
-      isPaginating,
     })
   }
 
