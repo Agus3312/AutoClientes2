@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { useJsApiLoader } from '@react-google-maps/api'
 import { Search, MapPin, Loader2, X, Sparkles, Radar, Clock } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useBusinessSearch } from '../hooks/useBusinessSearch'
+
+const GOOGLE_MAPS_LIBRARIES = ['places']
 
 const QUICK_SEARCHES = [
   { label: 'Cafeterías', icon: '☕' },
@@ -21,6 +24,11 @@ const RADIUS_OPTIONS = [
 ]
 
 export default function SearchBar() {
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    libraries: GOOGLE_MAPS_LIBRARIES,
+  })
+
   const [businessType, setBusinessType] = useState('')
   const [location, setLocation]         = useState('')
   const [radius, setRadius]             = useState(5000)
@@ -65,7 +73,7 @@ export default function SearchBar() {
   }, [radius])
 
   useEffect(() => {
-    if (!window.google || !locationInputRef.current) return
+    if (!isLoaded || !locationInputRef.current) return
     autocompleteRef.current = new window.google.maps.places.Autocomplete(locationInputRef.current, {
       types: ['(cities)'],
       fields: ['geometry', 'name', 'formatted_address'],
@@ -80,7 +88,7 @@ export default function SearchBar() {
         }
       }
     })
-  }, [window.google])
+  }, [isLoaded])
 
   const handleSearch = (typeOverride) => {
     const type = typeOverride || businessType
