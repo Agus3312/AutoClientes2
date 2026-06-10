@@ -10,11 +10,11 @@ const PLACEHOLDERS_HELP = [
   { tag: '{resenas}', desc: 'Cantidad de resenas' },
 ]
 
-export default function SettingsPanel() {
+export default function SettingsPanel({ inline }) {
   const { showSettings, setShowSettings, userSettings, setUserSettings, addToast, clearLighthouseCache } = useApp()
   const [tab, setTab] = useState('message')
 
-  if (!showSettings) return null
+  if (!inline && !showSettings) return null
 
   const customTemplate = userSettings.customTemplate || ''
   const sellerName = userSettings.sellerName || ''
@@ -35,21 +35,20 @@ export default function SettingsPanel() {
     addToast('Cache de Lighthouse borrado', 'success')
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
-
-      <div className="relative w-full max-w-lg bg-white dark:bg-surface-950 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-scale-in">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-brand-500" />
-            <h2 className="font-semibold text-slate-800 dark:text-white">Configuracion</h2>
-          </div>
+  const content = (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <Settings className="w-4 h-4 text-brand-500" />
+          <h2 className="font-semibold text-slate-800 dark:text-white">Configuracion</h2>
+        </div>
+        {!inline && (
           <button onClick={() => setShowSettings(false)} className="btn-ghost">
             <X className="w-4 h-4" />
           </button>
-        </div>
+        )}
+      </div>
 
         {/* Tabs */}
         <div className="flex border-b border-slate-100 dark:border-slate-800 px-4">
@@ -72,7 +71,7 @@ export default function SettingsPanel() {
           ))}
         </div>
 
-        <div className="overflow-y-auto max-h-[60vh] p-4">
+        <div className="overflow-y-auto flex-1 p-4">
           {tab === 'message' && (
             <div className="space-y-4">
               <div>
@@ -153,6 +152,22 @@ export default function SettingsPanel() {
             </div>
           )}
         </div>
+    </>
+  )
+
+  if (inline) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden bg-white dark:bg-surface-950">
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
+      <div className="relative w-full max-w-lg bg-white dark:bg-surface-950 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-scale-in">
+        {content}
       </div>
     </div>
   )

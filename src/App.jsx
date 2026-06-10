@@ -5,12 +5,8 @@ import { useApp } from './context/AppContext'
 import Navbar from './components/Navbar'
 import SearchBar from './components/SearchBar'
 import BusinessList from './components/BusinessList'
-import PromptPanel from './components/PromptPanel'
+import DetailPanel from './components/DetailPanel'
 import ComparePanel from './components/ComparePanel'
-import SavedPanel from './components/SavedPanel'
-import PipelineView from './components/PipelineView'
-import DashboardPanel from './components/DashboardPanel'
-import SettingsPanel from './components/SettingsPanel'
 import WelcomeScreen from './components/WelcomeScreen'
 import Toast from './components/Toast'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -72,16 +68,12 @@ function AppContent() {
             : 'hidden lg:block'
         }`}>
           <ErrorBoundary>
-            <PromptPanel />
+            <DetailPanel />
           </ErrorBoundary>
         </div>
       </main>
 
       {showCompare && <ComparePanel />}
-      <PipelineView />
-      <DashboardPanel />
-      <SettingsPanel />
-      <SavedPanel />
       <Toast />
       <WelcomeScreen />
     </div>

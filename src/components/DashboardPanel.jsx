@@ -31,30 +31,29 @@ function FunnelStep({ label, count, total, color, isLast }) {
   )
 }
 
-export default function DashboardPanel() {
+export default function DashboardPanel({ inline }) {
   const { showDashboard, setShowDashboard, trackedCounts, searchHistory } = useApp()
 
-  if (!showDashboard) return null
+  if (!inline && !showDashboard) return null
 
   const totalSearched = searchHistory.reduce((sum, s) => sum + (s.totalResults || 0), 0)
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowDashboard(false)} />
-
-      <div className="relative w-full max-w-lg bg-white dark:bg-surface-950 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-scale-in">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-brand-500" />
-            <h2 className="font-semibold text-slate-800 dark:text-white">Dashboard</h2>
-          </div>
+  const content = (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-brand-500" />
+          <h2 className="font-semibold text-slate-800 dark:text-white">Dashboard</h2>
+        </div>
+        {!inline && (
           <button onClick={() => setShowDashboard(false)} className="btn-ghost">
             <X className="w-4 h-4" />
           </button>
-        </div>
+        )}
+      </div>
 
-        <div className="overflow-y-auto max-h-[65vh] p-4 space-y-4">
+      <div className="overflow-y-auto flex-1 p-4 space-y-4">
           {/* Stats cards */}
           <div className="grid grid-cols-2 gap-2">
             <StatCard icon={Globe} label="Busquedas realizadas" value={searchHistory.length} color="text-brand-500" />
@@ -99,6 +98,22 @@ export default function DashboardPanel() {
             )}
           </div>
         </div>
+    </>
+  )
+
+  if (inline) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden bg-white dark:bg-surface-950">
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowDashboard(false)} />
+      <div className="relative w-full max-w-lg bg-white dark:bg-surface-950 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-scale-in">
+        {content}
       </div>
     </div>
   )

@@ -35,6 +35,9 @@ export function AppProvider({ children }) {
   const [showDashboard, setShowDashboard] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
+  // Right panel tab
+  const [detailTab, setDetailTab] = useState('message')
+
   // Compare
   const [compareList, setCompareList] = useState([])
   const addToCompare = useCallback((business) => {
@@ -93,6 +96,7 @@ export function AppProvider({ children }) {
       showInteresados, setShowInteresados,
       showDashboard, setShowDashboard,
       showSettings, setShowSettings,
+      detailTab, setDetailTab,
 
       // Compare
       compareList, addToCompare, isInCompare, clearCompare,

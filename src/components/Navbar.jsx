@@ -4,7 +4,7 @@ import { Moon, Sun, GitCompare, Zap, Bookmark, BarChart3, Settings, LayoutGrid }
 
 export default function Navbar() {
   const { isDark, toggleTheme } = useTheme()
-  const { compareList, setShowCompare, savedBusinesses, setShowSaved, trackedCounts, setShowInteresados, setShowDashboard, setShowSettings, searchHistory } = useApp()
+  const { compareList, setShowCompare, savedBusinesses, trackedCounts, setDetailTab, searchHistory } = useApp()
 
   return (
     <nav className="bg-white/80 dark:bg-surface-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 px-5 h-14 flex items-center justify-between sticky top-0 z-50">
@@ -24,7 +24,7 @@ export default function Navbar() {
       {/* Right actions */}
       <div className="flex items-center gap-1.5">
         <button
-          onClick={() => setShowDashboard(true)}
+          onClick={() => setDetailTab('dashboard')}
           className={`btn-ghost relative ${searchHistory.length > 0 ? 'text-brand-500' : ''}`}
           title="Dashboard"
         >
@@ -45,7 +45,7 @@ export default function Navbar() {
         )}
         {trackedCounts.total > 0 && (
           <button
-            onClick={() => setShowInteresados(true)}
+            onClick={() => setDetailTab('pipeline')}
             className="flex items-center gap-1.5 bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/30 text-brand-700 dark:text-brand-300 text-sm font-semibold px-3 py-1.5 rounded-xl transition-colors"
             title="Pipeline de contactos"
           >
@@ -57,7 +57,7 @@ export default function Navbar() {
           </button>
         )}
         <button
-          onClick={() => setShowSaved(true)}
+          onClick={() => setDetailTab('saved')}
           className={`btn-ghost relative ${savedBusinesses.length > 0 ? 'text-amber-500' : ''}`}
           title="Negocios guardados"
         >
@@ -68,7 +68,7 @@ export default function Navbar() {
             </span>
           )}
         </button>
-        <button onClick={() => setShowSettings(true)} className="btn-ghost" title="Configuracion">
+        <button onClick={() => setDetailTab('settings')} className="btn-ghost" title="Configuracion">
           <Settings className="w-4 h-4" />
         </button>
         <button onClick={toggleTheme} className="btn-ghost" title={isDark ? 'Modo claro' : 'Modo oscuro'}>

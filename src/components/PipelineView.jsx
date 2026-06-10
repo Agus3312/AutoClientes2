@@ -23,7 +23,7 @@ function formatRelativeTime(iso) {
   return `hace ${days}d`
 }
 
-export default function PipelineView() {
+export default function PipelineView({ inline }) {
   const {
     trackedBusinesses, contactStatuses, contactTimestamps,
     showInteresados, setShowInteresados,
@@ -35,7 +35,7 @@ export default function PipelineView() {
   const [showReminder, setShowReminder] = useState(null) // placeId or null
   const [mobileCol, setMobileCol] = useState(0) // for mobile column swipe
 
-  if (!showInteresados) return null
+  if (!inline && !showInteresados) return null
 
   const handleRemove = (business) => {
     clearContactStatus(business.place_id)
@@ -48,100 +48,59 @@ export default function PipelineView() {
 
   const getBusinessByPlaceId = (placeId) => trackedBusinesses.find(b => b.place_id === placeId)
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowInteresados(false)} />
-
-      <div className="relative w-full h-full sm:h-[85vh] max-w-5xl bg-white dark:bg-surface-950 rounded-2xl sm:rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800/80 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-sm shadow-brand-500/25">
-              <span className="text-white text-sm">📥</span>
-            </div>
-            <div>
-              <h2 className="font-display font-bold text-slate-800 dark:text-white">Pipeline</h2>
-              <p className="text-[11px] text-slate-400 dark:text-gray-500 -mt-0.5">{trackedBusinesses.length} negocios en seguimiento</p>
-            </div>
+  const content = (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-sm shadow-brand-500/25">
+            <span className="text-white text-sm">📥</span>
           </div>
+          <div>
+            <h2 className="font-display font-bold text-slate-800 dark:text-white">Pipeline</h2>
+            <p className="text-[11px] text-slate-400 dark:text-gray-500 -mt-0.5">{trackedBusinesses.length} negocios en seguimiento</p>
+          </div>
+        </div>
+        {!inline && (
           <button onClick={() => setShowInteresados(false)} className="btn-ghost">
             <X className="w-4 h-4" />
           </button>
-        </div>
+        )}
+      </div>
 
-        {/* Mobile column tabs */}
-        <div className="flex sm:hidden border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
-          {COLUMNS.map((col, i) => {
-            const count = trackedBusinesses.filter(b => contactStatuses[b.place_id] === col.status).length
+      {/* Mobile column tabs */}
+      <div className="flex sm:hidden border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+        {COLUMNS.map((col, i) => {
+          const count = trackedBusinesses.filter(b => contactStatuses[b.place_id] === col.status).length
+          return (
+            <button key={col.status} onClick={() => setMobileCol(i)}
+              className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${
+                mobileCol === i ? `text-brand-600 dark:text-brand-400 border-b-2 border-brand-500` : 'text-slate-400 dark:text-gray-500'
+              }`}
+            >
+              {col.icon} {col.label} ({count})
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Kanban columns */}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Desktop: all 3 columns */}
+        <div className="hidden sm:flex flex-1 gap-3 p-4 overflow-hidden">
+          {COLUMNS.map(col => {
+            const items = trackedBusinesses.filter(b => contactStatuses[b.place_id] === col.status)
             return (
-              <button key={col.status} onClick={() => setMobileCol(i)}
-                className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${
-                  mobileCol === i ? `text-brand-600 dark:text-brand-400 border-b-2 border-brand-500` : 'text-slate-400 dark:text-gray-500'
-                }`}
-              >
-                {col.icon} {col.label} ({count})
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Kanban columns */}
-        <div className="flex-1 overflow-hidden flex">
-          {/* Desktop: all 3 columns */}
-          <div className="hidden sm:flex flex-1 gap-3 p-4 overflow-hidden">
-            {COLUMNS.map(col => {
-              const items = trackedBusinesses.filter(b => contactStatuses[b.place_id] === col.status)
-              return (
-                <div key={col.status} className="flex-1 flex flex-col min-w-0">
-                  <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl ${col.bgCol} ${col.borderCol} border`}>
-                    <span className="text-sm">{col.icon}</span>
-                    <span className="text-xs font-bold text-slate-600 dark:text-gray-300 uppercase tracking-wider">{col.label}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${col.badge}`}>{items.length}</span>
-                  </div>
-                  <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
-                    {items.length === 0 && (
-                      <div className="text-center py-8 text-slate-300 dark:text-gray-600 text-xs">
-                        Arrastra o mueve negocios aquí
-                      </div>
-                    )}
-                    {items.map(b => (
-                      <PipelineCard
-                        key={b.place_id}
-                        business={b}
-                        col={col}
-                        timestamps={contactTimestamps[b.place_id]}
-                        notes={getNotes(b.place_id)}
-                        reminder={getReminder(b.place_id)}
-                        onCycle={handleCycle}
-                        onRemove={handleRemove}
-                        onExpand={setSelectedCard}
-                        onReminder={setShowReminder}
-                      />
-                    ))}
-                  </div>
+              <div key={col.status} className="flex-1 flex flex-col min-w-0">
+                <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl ${col.bgCol} ${col.borderCol} border`}>
+                  <span className="text-sm">{col.icon}</span>
+                  <span className="text-xs font-bold text-slate-600 dark:text-gray-300 uppercase tracking-wider">{col.label}</span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${col.badge}`}>{items.length}</span>
                 </div>
-              )
-            })}
-          </div>
-
-          {/* Mobile: single column at a time */}
-          <div className="sm:hidden flex-1 flex flex-col overflow-hidden">
-            {COLUMNS.map((col, i) => {
-              if (i !== mobileCol) return null
-              const items = trackedBusinesses.filter(b => contactStatuses[b.place_id] === col.status)
-              return (
-                <div key={col.status} className="flex-1 overflow-y-auto p-3 space-y-2">
-                  {/* Nav arrows */}
-                  <div className="flex items-center justify-between mb-2">
-                    <button onClick={() => setMobileCol(Math.max(0, i - 1))} disabled={i === 0}
-                      className="btn-ghost disabled:opacity-30"><ChevronLeft className="w-4 h-4" /></button>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${col.badge}`}>{items.length}</span>
-                    <button onClick={() => setMobileCol(Math.min(2, i + 1))} disabled={i === 2}
-                      className="btn-ghost disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
-                  </div>
+                <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
                   {items.length === 0 && (
-                    <div className="text-center py-12 text-slate-300 dark:text-gray-600 text-xs">
-                      Sin negocios en esta etapa
+                    <div className="text-center py-8 text-slate-300 dark:text-gray-600 text-xs">
+                      Arrastra o mueve negocios aquí
                     </div>
                   )}
                   {items.map(b => (
@@ -159,40 +118,96 @@ export default function PipelineView() {
                     />
                   ))}
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            )
+          })}
         </div>
 
-        {/* Expanded card detail */}
-        {selectedCard && (
-          <CardDetail
-            business={selectedCard}
-            timestamps={contactTimestamps?.[selectedCard.place_id]}
-            notes={getNotes(selectedCard.place_id)}
-            reminder={getReminder(selectedCard.place_id)}
-            status={contactStatuses[selectedCard.place_id]}
-            onClose={() => setSelectedCard(null)}
-            onCycle={() => cycleContactStatus(selectedCard)}
-            onRemove={() => { handleRemove(selectedCard) }}
-            onSetNotes={text => setNotes(selectedCard.place_id, text)}
-            onSetReminder={(date, note) => { setReminder(selectedCard.place_id, date, note); setShowReminder(null) }}
-            onCompleteReminder={() => completeReminder(selectedCard.place_id)}
-            onRemoveReminder={() => removeReminder(selectedCard.place_id)}
-            onOpenReminder={() => setShowReminder(selectedCard.place_id)}
-          />
-        )}
+        {/* Mobile: single column at a time */}
+        <div className="sm:hidden flex-1 flex flex-col overflow-hidden">
+          {COLUMNS.map((col, i) => {
+            if (i !== mobileCol) return null
+            const items = trackedBusinesses.filter(b => contactStatuses[b.place_id] === col.status)
+            return (
+              <div key={col.status} className="flex-1 overflow-y-auto p-3 space-y-2">
+                {/* Nav arrows */}
+                <div className="flex items-center justify-between mb-2">
+                  <button onClick={() => setMobileCol(Math.max(0, i - 1))} disabled={i === 0}
+                    className="btn-ghost disabled:opacity-30"><ChevronLeft className="w-4 h-4" /></button>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${col.badge}`}>{items.length}</span>
+                  <button onClick={() => setMobileCol(Math.min(2, i + 1))} disabled={i === 2}
+                    className="btn-ghost disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
+                </div>
+                {items.length === 0 && (
+                  <div className="text-center py-12 text-slate-300 dark:text-gray-600 text-xs">
+                    Sin negocios en esta etapa
+                  </div>
+                )}
+                {items.map(b => (
+                  <PipelineCard
+                    key={b.place_id}
+                    business={b}
+                    col={col}
+                    timestamps={contactTimestamps[b.place_id]}
+                    notes={getNotes(b.place_id)}
+                    reminder={getReminder(b.place_id)}
+                    onCycle={handleCycle}
+                    onRemove={handleRemove}
+                    onExpand={setSelectedCard}
+                    onReminder={setShowReminder}
+                  />
+                ))}
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
-        {/* Reminder modal */}
-        {showReminder && (
-          <ReminderModal
-            placeId={showReminder}
-            existingReminder={getReminder(showReminder)}
-            onSave={(date, note) => { setReminder(showReminder, date, note); setShowReminder(null) }}
-            onRemove={() => { removeReminder(showReminder); setShowReminder(null) }}
-            onClose={() => setShowReminder(null)}
-          />
-        )}
+      {/* Expanded card detail */}
+      {selectedCard && (
+        <CardDetail
+          business={selectedCard}
+          timestamps={contactTimestamps?.[selectedCard.place_id]}
+          notes={getNotes(selectedCard.place_id)}
+          reminder={getReminder(selectedCard.place_id)}
+          status={contactStatuses[selectedCard.place_id]}
+          onClose={() => setSelectedCard(null)}
+          onCycle={() => cycleContactStatus(selectedCard)}
+          onRemove={() => { handleRemove(selectedCard) }}
+          onSetNotes={text => setNotes(selectedCard.place_id, text)}
+          onSetReminder={(date, note) => { setReminder(selectedCard.place_id, date, note); setShowReminder(null) }}
+          onCompleteReminder={() => completeReminder(selectedCard.place_id)}
+          onRemoveReminder={() => removeReminder(selectedCard.place_id)}
+          onOpenReminder={() => setShowReminder(selectedCard.place_id)}
+        />
+      )}
+
+      {/* Reminder modal */}
+      {showReminder && (
+        <ReminderModal
+          placeId={showReminder}
+          existingReminder={getReminder(showReminder)}
+          onSave={(date, note) => { setReminder(showReminder, date, note); setShowReminder(null) }}
+          onRemove={() => { removeReminder(showReminder); setShowReminder(null) }}
+          onClose={() => setShowReminder(null)}
+        />
+      )}
+    </>
+  )
+
+  if (inline) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden bg-white dark:bg-surface-950">
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowInteresados(false)} />
+      <div className="relative w-full h-full sm:h-[85vh] max-w-5xl bg-white dark:bg-surface-950 rounded-2xl sm:rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800/80 flex flex-col overflow-hidden">
+        {content}
       </div>
     </div>
   )
