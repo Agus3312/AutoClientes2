@@ -62,6 +62,6 @@
   padding: 4px;
 }
 .pac-item { padding: 8px 12px !important; font-size: 13px !important; cursor: pointer; border-radius: 8px; border-top: none !important; }
-.pac-item:hover { background: #f0f0ff !important; }
-.pac-matched { color: #5527eb !important; font-weight: 600 !important; }
+.pac-item:hover { background: #fff8eb !important; }
+.pac-matched { color: #B45309 !important; font-weight: 600 !important; }
 .pac-icon { display: none !important; }
